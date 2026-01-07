@@ -1,4 +1,3 @@
-
 services:
   dongguatv:
     build: .
@@ -10,3 +9,5 @@ services:
     #- PORT=3000
     - TMDB_API_KEY=key
     - ADMIN_PASSWORD=admin
+    # 弹幕api再次填入url
+    - DANMAKU_API=
