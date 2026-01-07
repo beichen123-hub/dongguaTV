@@ -11,6 +11,7 @@
 - 🔍 **智能搜索** - 聚合30+影视站点，一键搜索全网资源
 - ⚡ **实时测速** - 自动检测各站点响应速度，优先推荐最快资源
 - 🎯 **多源聚合** - 支持非凡影视、暴风资源、电影天堂等30+主流站点
+- 💬 **弹幕互动** - 集成 DPlayer 播放器，支持绑定自定义弹幕 API，实时互动
 - 🔥 **热门推荐** - 自动获取24小时热门影视内容
 - 🎨 **简洁界面** - 响应式设计，支持PC/移动端完美适配
 - 🔐 **后台管理** - 支持站点开关配置，自定义资源源
@@ -41,11 +42,14 @@ npm start
 node server.js
 ```
 
-### Docker 方式
+### Docker 方式 (推荐)
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/dongguaTV.git
+git clone [https://github.com/your-username/dongguaTV.git]
 cd dongguaTV
+# ⚠️ 注意：启动前请编辑 docker-compose.yml
+# 填入你的 TMDB_API_KEY 和 DANMAKU_API (弹幕接口地址)
+
 # 编译和启动
 docker compose up -d --build
 ```
@@ -107,6 +111,22 @@ const PORT = 3000;              // 服务端口
 const ADMIN_PASSWORD = "admin"; // 管理员密码
 const FORCE_UPDATE = true;      // 是否强制更新站点配置
 ```
+```markdown
+### 💬 弹幕功能配置 (新增)
+本项目已集成 DPlayer，支持通过环境变量接入外部弹幕服务器（如 dplayer-node）。
+
+**配置方式：**
+在 `docker-compose.yml` 或启动环境变量中设置 `DANMAKU_API`。
+
+- **DANMAKU_API**: 你的弹幕服务器接口地址。
+  - 示例：`http://1.2.3.4:1234/` (注意通常需要以 / 结尾)
+  - 如果留空，播放器将自动降级为无弹幕模式，不影响正常播放。
+
+**Docker Compose 配置示例：**
+```yaml
+environment:
+  - TMDB_API_KEY=你的Key
+  - DANMAKU_API=http://你的弹幕服务器IP:端口/  # 在这里填入
 
 ### 站点配置
 站点配置存储在 `db.json` 文件中，包含以下字段：
