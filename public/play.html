@@ -2,8 +2,9 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>正在播放...</title>
+    <title>正在播放</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
@@ -14,49 +15,48 @@
 </head>
 <body>
     <div id="dplayer"></div>
-
     <script>
-        // 1. 从 URL 获取参数 (视频链接、ID、片名)
         const urlParams = new URLSearchParams(window.location.search);
         const videoUrl = urlParams.get('url');
         const videoId = urlParams.get('id'); 
-        
-        if (videoUrl) {
-            initPlayer(videoUrl, videoId);
-        } else {
-            alert('未找到视频链接');
-        }
+        const videoName = urlParams.get('name');
 
-        function initPlayer(url, id) {
-            // 2. 请求后端获取弹幕 API 地址
+        document.title = "播放 - " + (videoName || "");
+
+        if (videoUrl) {
+            // 1. 先请求后端获取 API 配置
             fetch('/api/config')
                 .then(res => res.json())
                 .then(config => {
-                    const api = config.danmaku_api;
-                    
-                    // 3. 配置 DPlayer
-                    const options = {
-                        container: document.getElementById('dplayer'),
-                        autoplay: true,
-                        video: {
-                            url: url,
-                            type: 'hls',
-                        }
-                    };
-
-                    // 如果有 API，启用弹幕
-                    if (api) {
-                        options.danmaku = {
-                            id: id, // 使用 URL 传过来的 ID
-                            api: api,
-                            user: 'User',
-                            bottom: '15%',
-                            unlimited: true
-                        };
-                    }
-
-                    new DPlayer(options);
+                    initPlayer(videoUrl, videoId, config.danmaku_api);
+                })
+                .catch(e => {
+                    console.error("配置加载失败，启用无弹幕模式", e);
+                    initPlayer(videoUrl, videoId, "");
                 });
+        } else {
+            alert('缺少播放地址');
+        }
+
+        function initPlayer(url, id, apiUrl) {
+            const options = {
+                container: document.getElementById('dplayer'),
+                autoplay: true,
+                video: { url: url, type: 'hls' }
+            };
+
+            // 只有当获取到 API 且有 ID 时，才开启弹幕
+            if (apiUrl && id) {
+                options.danmaku = {
+                    id: id,      // 视频唯一ID
+                    api: apiUrl, // 从后端读来的 API
+                    user: 'User',
+                    bottom: '15%',
+                    unlimited: true
+                };
+            }
+
+            new DPlayer(options);
         }
     </script>
 </body>
