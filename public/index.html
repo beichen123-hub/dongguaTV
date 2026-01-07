@@ -236,11 +236,6 @@
                     </button>
                 </div>
 
-                <!-- 2. 中部：超大播放器 -->
-                <div class="player-box">
-                    <div id="dplayer" style="width: 100%; height: 100%;"></div>
-                </div>
-
                 <!-- 3. 底部：控制面板 -->
                 <div class="controls-area">
                     <!-- 线路选择 -->
@@ -584,12 +579,17 @@
                 },
                 play(url) {
                     this.currentUrl = url;
-                    if (!dp) dp = new DPlayer({
-                        container: document.getElementById('dplayer'),
-                        theme: '#e50914', video: { url: url, type: 'hls' }
-                    });
-                    else dp.switchVideo({ url: url, type: 'hls' });
-                    dp.play();
+    
+                    // 获取当前视频的 ID (用于弹幕) 和 名称
+                    // 如果 currentSource 还没加载好，就用 hash 做一个临时 ID
+                    const vid = this.currentSource ? this.currentSource.vod_id : 'temp_' + Math.random();
+                    const vname = this.currentGroup ? this.currentGroup.name : '未知视频';
+
+                    // 拼接跳转链接
+                    const targetUrl = `/play.html?url=${encodeURIComponent(url)}&id=${vid}&name=${encodeURIComponent(vname)}`;
+    
+                    // 在新窗口打开播放页
+                    window.open(targetUrl, '_blank');
                 },
                 
                 // 热榜左右滚动功能
