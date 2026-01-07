@@ -32,14 +32,19 @@ cd dongguaTV
 # 安装依赖
 npm install
 
-# 配置TMDB_API_KEY 编辑 index.html 
-const TMDB_API_KEY = "替换成你自己的KEY"; 
-# 配置 TMDB_API_KEY 为你自己的TMDb API密钥
+# 配置 TMDB_API_KEY
+# 编辑 public/index.html (或 play.html)，找到 TMDB_API_KEY 并替换为你自己的密钥
 
-# 启动服务
+# --- 新增：配置弹幕 API 并启动服务 ---
+
+# 方式 A：Linux / macOS (终端)
+export DANMAKU_API="http://你的弹幕API地址/" && npm start
+
+# 方式 B：Windows (PowerShell)
+$env:DANMAKU_API="http://你的弹幕API地址/"; npm start
+
+# 方式 C：不配置弹幕直接启动 (无弹幕模式)
 npm start
-# 或
-node server.js
 ```
 
 ### Docker 方式 (推荐)
