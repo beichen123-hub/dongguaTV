@@ -123,5 +123,15 @@ app.get('/api/detail', async (req, res) => {
 app.post('/api/admin/login', (req, res) => req.body.password === ADMIN_PASSWORD ? res.json({ success: true }) : res.status(403).json({ success: false }));
 app.get('/api/admin/sites', (req, res) => res.json(getDB().sites));
 app.post('/api/admin/sites', (req, res) => { saveDB({sites: req.body.sites}); res.json({ success: true }); });
+// ==========================================
+// 新增：读取环境变量中的弹幕API地址，并暴露给前端
+// ==========================================
+const DANMAKU_API_URL = process.env.DANMAKU_API || ""; // 默认为空，运行时从环境变量获取
+
+app.get('/api/config', (req, res) => {
+    res.json({
+        danmaku_api: DANMAKU_API_URL
+    });
+});
 
 app.listen(PORT, () => { console.log(`服务已启动: http://localhost:${PORT}`); });
