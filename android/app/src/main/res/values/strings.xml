@@ -14,6 +14,15 @@
     <string name="status_error">加载失败，点击重试</string>
     <string name="status_network_error">网络连接失败</string>
     <string name="msg_load_fail">加载失败，请重试</string>
+    <string name="title_favorites">我的收藏</string>
+    <string name="title_history">播放历史</string>
+    <string name="title_follows">我的追剧</string>
+    <string name="action_clear_history">清空历史</string>
+    <string name="msg_confirm_delete">确认删除？</string>
+    <string name="action_delete">删除</string>
+    <string name="action_cancel">取消</string>
+    <string name="channel_follow">追剧更新</string>
+    <string name="channel_follow_desc">追剧有新集数时通知</string>
     <string name="danmu_on">弹幕开</string>
     <string name="danmu_off">弹幕关</string>
 </resources>

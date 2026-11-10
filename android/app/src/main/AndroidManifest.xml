@@ -41,6 +41,16 @@
             android:screenOrientation="sensorLandscape"
             android:theme="@style/Theme.Dongguatv" />
 
+        <activity
+            android:name=".ui.favorite.FavoriteActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <activity
+            android:name=".ui.history.HistoryActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <activity
+            android:name=".ui.follow.FollowActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
     </application>
 
 </manifest>

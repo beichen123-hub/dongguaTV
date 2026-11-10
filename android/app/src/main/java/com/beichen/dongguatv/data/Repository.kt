@@ -53,6 +53,8 @@ class Repository private constructor(context: Context) {
             vodName = item.vod_name, vodPic = item.vod_pic
         ))
     }
+    suspend fun deleteFavorite(vodId: String, siteKey: String) = db.favoriteDao().delete(vodId, siteKey)
+    suspend fun deleteFollow(id: Long) = db.followDao().delete(id)
 
     // ===== 历史 =====
     fun observeHistory(): LiveData<List<HistoryEntity>> = db.historyDao().observeAll()
