@@ -3,21 +3,13 @@ name: Build APK
 on:
   push:
     branches: [ main, master ]
-    paths:
-      - 'android/**'
-      - '.github/workflows/build-apk.yml'
   pull_request:
     branches: [ main, master ]
-    paths:
-      - 'android/**'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: android
 
     steps:
       - name: Checkout
@@ -38,10 +30,27 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Grant execute permission for gradlew
+        working-directory: android
         run: chmod +x gradlew
 
+      # 纯逻辑单测（播放地址解析 / 剧名归一化）。这些不是形式主义：
+      # vod_play_url 的 $ # $$$ 分隔、剧名营销后缀，都是踩过坑的地方。
+      - name: Unit tests
+        working-directory: android
+        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
+
       - name: Build debug APK
+        working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: android/app/build/reports/tests/testDebugUnitTest/
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
