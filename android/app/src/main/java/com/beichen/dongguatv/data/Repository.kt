@@ -84,39 +84,41 @@ class Repository private constructor(context: Context) {
     }
 
     /** 兜底：按剧名搜到番剧，再从集列表里挑第 ep 集 */
-    private suspend fun trySearchEpisodes(name: String, ep: Int): String? = try {
-        val resp = danmuApi.searchEpisodes(name)
-        if (!resp.isSuccessful) return null
-        val body = resp.body()?.string() ?: return null
-        val animes = JSONObject(body).optJSONArray("animes") ?: return null
-        var picked: String? = null
-        for (i in 0 until animes.length()) {
-            val anime = animes.optJSONObject(i) ?: continue
-            val title = anime.optString("animeTitle")
-            // 标题里得含剧名，且尽量避开动漫/综艺（同名真人剧优先）
-            if (!title.replace(" ", "").contains(name.replace(" ", ""))) continue
-            val isCartoon = title.contains("动漫") || title.contains("综艺")
-            val episodes = anime.optJSONArray("episodes") ?: continue
-            if (episodes.length() == 0) continue
-            var epId = ""
-            for (j in 0 until episodes.length()) {
-                val e = episodes.optJSONObject(j) ?: continue
-                if (e.optString("episodeTitle").contains("第${ep}集")) {
-                    epId = e.optString("episodeId"); break
+    private suspend fun trySearchEpisodes(name: String, ep: Int): String? {
+        return try {
+            val resp = danmuApi.searchEpisodes(name)
+            if (!resp.isSuccessful) return null
+            val body = resp.body()?.string() ?: return null
+            val animes = JSONObject(body).optJSONArray("animes") ?: return null
+            var picked: String? = null
+            for (i in 0 until animes.length()) {
+                val anime = animes.optJSONObject(i) ?: continue
+                val title = anime.optString("animeTitle")
+                // 标题里得含剧名，且尽量避开动漫/综艺（同名真人剧优先）
+                if (!title.replace(" ", "").contains(name.replace(" ", ""))) continue
+                val isCartoon = title.contains("动漫") || title.contains("综艺")
+                val episodes = anime.optJSONArray("episodes") ?: continue
+                if (episodes.length() == 0) continue
+                var epId = ""
+                for (j in 0 until episodes.length()) {
+                    val e = episodes.optJSONObject(j) ?: continue
+                    if (e.optString("episodeTitle").contains("第${ep}集")) {
+                        epId = e.optString("episodeId"); break
+                    }
+                }
+                if (epId.isEmpty()) {
+                    val idx = (ep - 1).coerceIn(0, episodes.length() - 1)
+                    epId = episodes.optJSONObject(idx)?.optString("episodeId").orEmpty()
+                }
+                if (epId.isNotBlank()) {
+                    picked = epId
+                    if (!isCartoon) break   // 真人剧优先，命中就不找了
                 }
             }
-            if (epId.isEmpty()) {
-                val idx = (ep - 1).coerceIn(0, episodes.length() - 1)
-                epId = episodes.optJSONObject(idx)?.optString("episodeId").orEmpty()
-            }
-            if (epId.isNotBlank()) {
-                picked = epId
-                if (!isCartoon) break   // 真人剧优先，命中就不找了
-            }
+            picked
+        } catch (e: Exception) {
+            null
         }
-        picked
-    } catch (e: Exception) {
-        null
     }
 
     /** 拿弹幕 XML（B 站标准格式，单集常见 3-4MB / 4 万条） */
