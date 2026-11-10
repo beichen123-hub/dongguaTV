@@ -152,17 +152,19 @@ class Repository private constructor(context: Context) {
     }
     suspend fun deleteHistory(id: Long) = db.historyDao().delete(id)
     suspend fun clearHistory() = db.historyDao().clear()
+    suspend fun historyOf(vodId: String, siteKey: String) = db.historyDao().find(vodId, siteKey)
 
     // ===== 追剧 =====
     fun observeFollows(): LiveData<List<FollowEntity>> = db.followDao().observeAll()
     suspend fun isFollowed(vodId: String, siteKey: String) =
         db.followDao().find(vodId, siteKey) != null
-    suspend fun toggleFollow(item: VodItem) {
+    suspend fun toggleFollow(item: VodItem, lastEpisode: Int = 1) {
         val exist = db.followDao().find(item.vod_id, item.site_key)
         if (exist != null) db.followDao().delete(exist.id)
         else db.followDao().upsert(FollowEntity(
             vodId = item.vod_id, siteKey = item.site_key,
-            vodName = item.vod_name, vodPic = item.vod_pic
+            vodName = item.vod_name, vodPic = item.vod_pic,
+            lastEpisode = lastEpisode.coerceAtLeast(1)
         ))
     }
     /** 检查追剧更新：对比采集站最新集数，返回有更新的列表 */

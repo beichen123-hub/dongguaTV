@@ -28,6 +28,9 @@ class DetailActivity : AppCompatActivity() {
     private var detail: VodDetail? = null
     private var playLines: List<PlayLine> = emptyList()
     private var currentLine: Int = 0
+
+    /** 上次看到第几集（0 起），用于「继续播放」 */
+    private var resumeIndex: Int = 0
     private val episodeAdapter = EpisodeAdapter { ep ->
         play(ep.index)
     }
@@ -51,7 +54,7 @@ class DetailActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
-        binding.btnPlay.setOnClickListener { play(0) }
+        binding.btnPlay.setOnClickListener { play(resumeIndex) }
         binding.btnFavorite.setOnClickListener { toggleFavorite() }
         binding.btnFollow.setOnClickListener { toggleFollow() }
         binding.tvError.setOnClickListener { loadDetail() }
@@ -82,6 +85,12 @@ class DetailActivity : AppCompatActivity() {
                 }
                 if (playLines.isEmpty() || playLines.all { it.episodes.isEmpty() }) {
                     showError("解析不到播放地址，换个源试试")
+                }
+                // 有播放记录就把主按钮改成「继续播放 第 N 集」
+                val lastEp = repo.historyOf(d.vod_id, siteKey)?.episodeIndex ?: 0
+                if (lastEp > 0) {
+                    resumeIndex = lastEp
+                    binding.btnPlay.text = "继续播放 第${lastEp + 1}集"
                 }
             } catch (e: Exception) {
                 showError("加载失败：${e.message ?: "网络异常"}\n点这里重试")
@@ -140,8 +149,10 @@ class DetailActivity : AppCompatActivity() {
 
     private fun toggleFollow() {
         val d = detail ?: return
+        // 首次追剧就把「当前已更新到第几集」记下来，否则下次检查会把已有集数全当新更新、发一堆通知
+        val total = playLines.maxOfOrNull { it.episodes.size } ?: 1
         lifecycleScope.launch {
-            repo.toggleFollow(toItem(d))
+            repo.toggleFollow(toItem(d), total)
             binding.btnFollow.text =
                 if (repo.isFollowed(d.vod_id, siteKey)) "已追剧" else "追剧"
         }

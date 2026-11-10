@@ -34,6 +34,15 @@ class PlayerActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnBack.setOnClickListener { finish() }
+
+        // 横屏全屏沉浸：藏状态栏/导航栏，划一下临时唤出
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+        androidx.core.view.WindowInsetsControllerCompat(window, binding.root).apply {
+            hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            systemBarsBehavior =
+                androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+        binding.playerView.keepScreenOn = true
         binding.btnDanmaku.setOnClickListener {
             danmakuOn = binding.danmakuView.toggle()
             binding.btnDanmaku.text = if (danmakuOn) "弹幕开" else "弹幕关"
