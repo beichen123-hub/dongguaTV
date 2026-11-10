@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.beichen.dongguatv.R
 import com.beichen.dongguatv.data.PlayLine
 import com.beichen.dongguatv.data.PlayUrlParser
 import com.beichen.dongguatv.data.Repository
@@ -53,19 +54,25 @@ class DetailActivity : AppCompatActivity() {
         binding.btnPlay.setOnClickListener { play(0) }
         binding.btnFavorite.setOnClickListener { toggleFavorite() }
         binding.btnFollow.setOnClickListener { toggleFollow() }
+        binding.tvError.setOnClickListener { loadDetail() }
 
         loadDetail()
     }
 
     private fun loadDetail() {
         binding.loading.visibility = android.view.View.VISIBLE
+        binding.tvError.visibility = android.view.View.GONE
         lifecycleScope.launch {
             try {
                 val resp = repo.detail(siteKey, vodId)
-                val d = resp.list.firstOrNull() ?: return@launch
+                val d = resp.list.firstOrNull()
+                if (d == null) {
+                    showError("该资源在「$siteKey」不可用，返回换一个源试试")
+                    return@launch
+                }
                 detail = d
                 bindDetail(d)
-                playLines = PlayUrlParser.parse(d.vod_play_url)
+                playLines = PlayUrlParser.parse(d.vod_play_url, d.vod_play_from)
                 binding.tabLines.removeAllTabs()
                 playLines.forEachIndexed { i, line ->
                     binding.tabLines.addTab(binding.tabLines.newTab().setText(line.name))
@@ -73,12 +80,20 @@ class DetailActivity : AppCompatActivity() {
                 if (playLines.isNotEmpty()) {
                     episodeAdapter.submit(playLines[0].episodes)
                 }
+                if (playLines.isEmpty() || playLines.all { it.episodes.isEmpty() }) {
+                    showError("解析不到播放地址，换个源试试")
+                }
             } catch (e: Exception) {
-                // 加载失败静默
+                showError("加载失败：${e.message ?: "网络异常"}\n点这里重试")
             } finally {
                 binding.loading.visibility = android.view.View.GONE
             }
         }
+    }
+
+    private fun showError(msg: String) {
+        binding.tvError.text = msg
+        binding.tvError.visibility = android.view.View.VISIBLE
     }
 
     private fun bindDetail(d: VodDetail) {
@@ -87,7 +102,10 @@ class DetailActivity : AppCompatActivity() {
             .filter { it.isNotBlank() }.joinToString(" · ")
         binding.tvRemarks.text = d.vod_remarks
         binding.tvContent.text = d.vod_content.ifBlank { "暂无简介" }
-        Glide.with(this).load(d.vod_pic).into(binding.ivPoster)
+        Glide.with(this).load(d.vod_pic)
+            .placeholder(R.color.colorSurfaceVariant)
+            .error(R.color.colorSurfaceVariant)
+            .into(binding.ivPoster)
         // 初始化收藏/追剧按钮状态
         lifecycleScope.launch {
             val fav = repo.isFavorite(d.vod_id, siteKey)

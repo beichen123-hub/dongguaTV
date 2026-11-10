@@ -31,6 +31,8 @@ class HistoryActivity : AppCompatActivity() {
         binding = ActivityListBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.toolbar.title = getString(R.string.title_history)
+        // 挂成 ActionBar，右上角「清空历史」菜单才会显示（主题是 NoActionBar，不挂不显示）
+        setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.list.layoutManager = LinearLayoutManager(this)
         binding.list.adapter = adapter

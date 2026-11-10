@@ -77,6 +77,10 @@ dependencies {
 
     // Media3 ExoPlayer 播放器
     implementation("androidx.media3:media3-exoplayer:1.2.1")
+    // 采集站播放地址 99% 是 m3u8（HLS），必须单独引入 HLS 模块，否则 UnrecognizedInputFormat
+    implementation("androidx.media3:media3-exoplayer-hls:1.2.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.2.1")
+    implementation("androidx.media3:media3-datasource-okhttp:1.2.1")
     implementation("androidx.media3:media3-ui:1.2.1")
     implementation("androidx.media3:media3-common:1.2.1")
 

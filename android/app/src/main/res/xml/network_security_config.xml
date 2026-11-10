@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- 默认走 HTTPS，影视后端 tv.bcpan.icu 是 HTTPS -->
-    <base-config cleartextTrafficPermitted="false">
+    <!--
+      自用影视聚合 app：采集站的海报图 / m3u8 播放地址 / 弹幕服务大量走明文 HTTP。
+      若默认禁明文，会出现「列表有内容但海报全白、视频加载失败」。
+      因此全局放行明文流量。本 app 不上架应用商店，仅私下分享使用。
+    -->
+    <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>
     </base-config>
-    <!-- 部分采集源海报图走 http，图片加载放行明文（仅图片域名） -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">113.137.46.16</domain>
-    </domain-config>
 </network-security-config>

@@ -85,7 +85,7 @@ interface FollowDao {
     suspend fun upsert(item: FollowEntity)
 
     @Query("UPDATE follows SET lastEpisode = :ep, updatedAt = :ts WHERE id = :id")
-    suspend fun updateEpisode(id: Long, ep: Int, ts: Long = System.currentTimeMillis())
+    suspend fun updateEpisode(id: Long, ep: Int, ts: Long)
 
     @Query("DELETE FROM follows WHERE id = :id")
     suspend fun delete(id: Long)

@@ -20,25 +20,39 @@ class Repository private constructor(context: Context) {
     suspend fun checkSite(key: String) = tvApi.check(key).latency
 
     // ===== 弹幕（直连公网 danmu_api）=====
-    /** 匹配剧集拿 episodeId，返回 null 表示没匹配到 */
+    /**
+     * 匹配剧集拿 episodeId，返回 null 表示没匹配到。
+     * danmu_api 的 /api/v2/match 只接受 fileName 字段，且返回体形如：
+     *   {"success":true,"isMatched":true,"matches":[{"episodeId":10002,"animeTitle":"繁花(2023)【电视剧】"}]}
+     */
     suspend fun matchDanmaku(keyword: String, episode: Int): String? {
-        val resp = danmuApi.match(MatchRequest(keyword, episode))
+        val ep = episode.coerceAtLeast(1).toString().padStart(2, '0')
+        val fileName = "$keyword S01E$ep.mp4"
+        val resp = danmuApi.match(MatchRequest(fileName))
         if (!resp.isSuccessful) return null
         val body = resp.body()?.string() ?: return null
         return try {
             val json = JSONObject(body)
-            // danmu_api 可能的字段路径：episodeId / data.episodeId / id
-            json.optString("episodeId").ifBlank { json.optString("id") }.ifBlank {
-                json.optJSONObject("data")?.optString("episodeId")
+            if (!json.optBoolean("success", false) || !json.optBoolean("isMatched", false)) {
+                null
+            } else {
+                val matches = json.optJSONArray("matches")
+                var id: String? = null
+                if (matches != null && matches.length() > 0) {
+                    id = matches.optJSONObject(0)?.optString("episodeId")
+                }
+                id?.takeIf { it.isNotBlank() }
             }
-        } catch (e: Exception) { null }?.takeIf { it.isNotBlank() }
+        } catch (e: Exception) {
+            null
+        }
     }
 
-    /** 拿弹幕 XML */
+    /** 拿弹幕 XML（B 站标准格式，单集常见 3-4MB / 4 万条） */
     suspend fun getDanmakuXml(episodeId: String): String? {
         val resp = danmuApi.comment(episodeId)
         if (!resp.isSuccessful) return null
-        return resp.body()?.string()
+        return resp.body()?.string()?.takeIf { it.isNotBlank() }
     }
 
     // ===== 收藏 =====
@@ -88,7 +102,7 @@ class Repository private constructor(context: Context) {
                 val item = detail.list.firstOrNull() ?: continue
                 val latest = PlayUrlParser.episodeCount(item.vod_play_url)
                 if (latest > f.lastEpisode) {
-                    db.followDao().updateEpisode(f.id, latest)
+                    db.followDao().updateEpisode(f.id, latest, System.currentTimeMillis())
                     updates.add(FollowUpdate(f, latest, latest - f.lastEpisode))
                 }
             } catch (e: Exception) { continue }

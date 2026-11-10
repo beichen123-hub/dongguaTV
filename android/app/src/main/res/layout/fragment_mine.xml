@@ -107,7 +107,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:text="收藏/历史/追剧列表页将在阶段3完善，当前已可写入数据。"
+        android:text="收藏 / 历史 / 追剧都保存在本机，不上传服务器。长按列表项可删除。"
         android:textColor="@color/textHint"
         android:textSize="12sp"
         app:layout_constraintTop_toBottomOf="@id/cardFollow" />

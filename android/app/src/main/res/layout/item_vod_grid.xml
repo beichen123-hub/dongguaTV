@@ -2,19 +2,20 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="6dp"
     android:background="@color/colorSurface"
     android:padding="6dp">
 
+    <!-- 注意：RecyclerView 里的条目 layout_width 不能写 0dp，
+         否则测量出来是 0 宽（整格空白）。海报高度同样写死，避免比例解析失败。 -->
     <ImageView
         android:id="@+id/ivPoster"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="170dp"
         android:scaleType="centerCrop"
         android:background="@color/colorSurfaceVariant"
-        app:layout_constraintDimensionRatio="2:3"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

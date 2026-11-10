@@ -35,7 +35,12 @@ data class VodDetail(
 
 data class CheckResponse(val latency: Int = 9999)
 
-data class MatchRequest(val keyword: String, val episode: Int = 1)
+/**
+ * danmu_api /api/v2/match 请求体。
+ * 实测该接口只认 fileName（传 keyword/episode 会 400 Missing fileName parameter），
+ * 文件名需带上季集信息才能精确匹配到单集。
+ */
+data class MatchRequest(val fileName: String)
 
 /** 单集播放信息：名称 + 播放地址 */
 data class Episode(
@@ -51,20 +56,30 @@ data class PlayLine(
 )
 
 object PlayUrlParser {
-    /** 解析采集站 vod_play_url 为播放线路列表。支持 # 和 $$$ 分隔。 */
-    fun parse(playUrl: String): List<PlayLine> {
+    /**
+     * 解析采集站 vod_play_url 为播放线路列表。
+     * 多线路用 $$$ 分隔，集与地址用 $ 分隔，集之间用 # 分隔。
+     * @param playFrom 采集站的 vod_play_from（如 "bfzym3u8,feifan"），用于给线路起真实名字
+     */
+    fun parse(playUrl: String, playFrom: String = ""): List<PlayLine> {
         if (playUrl.isBlank()) return emptyList()
+        val lineNames = playFrom.split(",").map { it.trim() }
         return playUrl.split("$$$").mapIndexed { lineIdx, lineRaw ->
             val eps = lineRaw.split("#").filter { it.isNotBlank() }.mapIndexed { epIdx, epRaw ->
                 val parts = epRaw.split("$", limit = 2)
                 Episode(
-                    name = parts.getOrNull(0)?.trim() ?: "第${epIdx + 1}集",
+                    name = parts.getOrNull(0)?.trim()?.takeIf { it.isNotBlank() }
+                        ?: "第${epIdx + 1}集",
                     url = parts.getOrNull(1)?.trim() ?: "",
                     index = epIdx
                 )
-            }
-            PlayLine(name = "线路${lineIdx + 1}", episodes = eps)
-        }
+            }.filter { it.url.isNotBlank() }
+            val rawName = lineNames.getOrNull(lineIdx)?.takeIf { it.isNotBlank() }
+            PlayLine(
+                name = rawName ?: "线路${lineIdx + 1}",
+                episodes = eps
+            )
+        }.filter { it.episodes.isNotEmpty() }
     }
 
     /** 取总集数（所有线路中最大的集数） */

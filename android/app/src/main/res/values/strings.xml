@@ -5,6 +5,8 @@
     <string name="nav_search">搜索</string>
     <string name="nav_mine">我的</string>
     <string name="hint_search">搜索影片、剧集、综艺…</string>
+    <string name="home_pull_refresh">下拉刷新推荐</string>
+    <string name="home_no_result">推荐加载失败，下拉重试\n或点上方搜索框直接搜索</string>
     <string name="action_play">立即播放</string>
     <string name="action_favorite">收藏</string>
     <string name="action_follow">追剧</string>
