@@ -43,8 +43,8 @@ class LocalListAdapter(
             tvSite.text = item.siteLabel
             Glide.with(ivPoster).load(item.vodPic).into(ivPoster)
             root.setOnClickListener { onClick(item) }
-            if (onLongClick != null) {
-                root.setOnLongClickListener { onLongClick(item); true }
+            onLongClick?.let { cb ->
+                root.setOnLongClickListener { cb(item); true }
             }
         }
     }
