@@ -4,10 +4,20 @@ services:
     container_name: dongguatv
     restart: unless-stopped
     ports:
-    - "3000:3000"
+    - "13000:3000"
     environment:
-    #- PORT=3000
-    - TMDB_API_KEY=key
-    - ADMIN_PASSWORD=admin
-    # 弹幕api再次填入url
+    - TMDB_API_KEY=
+    - ADMIN_PASSWORD=
     - DANMAKU_API=
+    - JWT_SECRET=change-this-to-a-random-string
+    - DANMU_INTERNAL_URL=http://danmu-danmu-api-1:9321/87654321
+    volumes:
+    - ./data.db:/app/data.db
+    - ./db.json:/app/db.json
+    networks:
+    - default
+    - danmu_default
+
+networks:
+  danmu_default:
+    external: true
