@@ -61,10 +61,12 @@ object SourceResolver {
 
     private suspend fun parsePage(raw: String): String? = withContext(Dispatchers.IO) {
         try {
+            val safeUrl = encodeNonAscii(raw)
             val req = Request.Builder()
-                .url(encodeNonAscii(raw))
+                .url(safeUrl)
+                // OkHttp 的 header 值只允许 ASCII，Referer 直接用 raw 会在带中文的地址上抛异常
                 .header("User-Agent", UA)
-                .header("Referer", raw)
+                .header("Referer", safeUrl)
                 .build()
             client.newCall(req).execute().use { resp ->
                 if (!resp.isSuccessful) return@withContext null
