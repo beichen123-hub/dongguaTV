@@ -43,9 +43,7 @@ interface TvApi {
     @GET("api/search")
     suspend fun search(@Query("wd") wd: String): SearchResponse
 
-    @GET("api/hot")
-    suspend fun hot(): SearchResponse
-
+    // 注意：后端没有 /api/hot（web 首页的热门是 HTML 硬编码），别再照着博客抄这个接口
     @GET("api/detail")
     suspend fun detail(@Query("site_key") siteKey: String, @Query("id") id: String): DetailResponse
 

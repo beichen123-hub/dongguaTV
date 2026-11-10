@@ -34,6 +34,9 @@ class DetailActivity : AppCompatActivity() {
 
     /** 上次看到第几集（0 起），用于「继续播放」 */
     private var resumeIndex: Int = 0
+
+    /** 上次看到这一集的第几毫秒 */
+    private var resumePositionMs: Long = 0
     private val episodeAdapter = EpisodeAdapter { ep ->
         play(ep.index)
     }
@@ -72,6 +75,7 @@ class DetailActivity : AppCompatActivity() {
         binding.loading.visibility = android.view.View.VISIBLE
         binding.tvError.visibility = android.view.View.GONE
         resumeIndex = 0
+        resumePositionMs = 0
         binding.btnPlay.text = "立即播放"
         lifecycleScope.launch {
             try {
@@ -95,9 +99,11 @@ class DetailActivity : AppCompatActivity() {
                     showError("解析不到播放地址，换个源试试")
                 }
                 // 有播放记录就把主按钮改成「继续播放 第 N 集」
-                val lastEp = repo.historyOf(d.vod_id, siteKey)?.episodeIndex ?: 0
+                val hist = repo.historyOf(d.vod_id, siteKey)
+                val lastEp = hist?.episodeIndex ?: 0
                 if (lastEp > 0) {
                     resumeIndex = lastEp
+                    resumePositionMs = hist?.positionMs ?: 0
                     binding.btnPlay.text = "继续播放 第${lastEp + 1}集"
                 }
                 loadSourceChips(d)
@@ -144,6 +150,11 @@ class DetailActivity : AppCompatActivity() {
             putExtra("siteKey", siteKey)
             putExtra("vodId", d.vod_id)
             putExtra("vodPic", d.vod_pic)
+            // 只在「继续播放的那一集」才带进度，点别的集从头开始
+            putExtra(
+                "startPositionMs",
+                if (ep.index == resumeIndex) resumePositionMs else 0L
+            )
         })
     }
 

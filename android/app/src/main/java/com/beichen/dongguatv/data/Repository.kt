@@ -15,7 +15,6 @@ class Repository private constructor(context: Context) {
 
     // ===== 影视接口（调现有 tv.bcpan.icu）=====
     suspend fun search(wd: String) = tvApi.search(wd)
-    suspend fun hot() = tvApi.hot()
     suspend fun detail(siteKey: String, id: String) = tvApi.detail(siteKey, id)
     suspend fun checkSite(key: String) = tvApi.check(key).latency
 
@@ -145,9 +144,17 @@ class Repository private constructor(context: Context) {
 
     // ===== 历史 =====
     fun observeHistory(): LiveData<List<HistoryEntity>> = db.historyDao().observeAll()
-    suspend fun recordHistory(vodId: String, siteKey: String, name: String, pic: String, episode: Int) {
+    suspend fun recordHistory(
+        vodId: String,
+        siteKey: String,
+        name: String,
+        pic: String,
+        episode: Int,
+        positionMs: Long = 0
+    ) {
         db.historyDao().upsert(HistoryEntity(
-            vodId = vodId, siteKey = siteKey, vodName = name, vodPic = pic, episodeIndex = episode
+            vodId = vodId, siteKey = siteKey, vodName = name, vodPic = pic,
+            episodeIndex = episode, positionMs = positionMs
         ))
     }
     suspend fun deleteHistory(id: Long) = db.historyDao().delete(id)

@@ -38,12 +38,22 @@ class HistoryActivity : AppCompatActivity() {
         binding.list.adapter = adapter
         repo.observeHistory().observe(this) { list ->
             adapter.submit(list.map {
+                val timeText = if (it.positionMs > 0) " · ${fmtTime(it.positionMs)}" else ""
                 LocalItem(it.vodId, it.siteKey, it.vodName, it.vodPic,
-                    subtitle = "看到第${it.episodeIndex + 1}集",
+                    subtitle = "看到第${it.episodeIndex + 1}集$timeText",
                     siteLabel = it.siteKey, id = it.id)
             })
             binding.tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         }
+    }
+
+    private fun fmtTime(ms: Long): String {
+        val total = ms / 1000
+        val h = total / 3600
+        val m = (total % 3600) / 60
+        val s = total % 60
+        return if (h > 0) String.format("%d:%02d:%02d", h, m, s)
+        else String.format("%02d:%02d", m, s)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

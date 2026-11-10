@@ -23,6 +23,8 @@ data class HistoryEntity(
     val vodName: String,
     val vodPic: String,
     val episodeIndex: Int = 0,
+    /** 该集内已播放到的毫秒位置，用于真正意义上的「继续播放」 */
+    val positionMs: Long = 0,
     val updatedAt: Long = System.currentTimeMillis()
 )
 
@@ -93,7 +95,7 @@ interface FollowDao {
 
 @Database(
     entities = [FavoriteEntity::class, HistoryEntity::class, FollowEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

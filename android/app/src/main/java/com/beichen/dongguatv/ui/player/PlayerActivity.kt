@@ -25,6 +25,8 @@ class PlayerActivity : AppCompatActivity() {
     private val url by lazy { intent.getStringExtra("url").orEmpty() }
     private val vodName by lazy { intent.getStringExtra("vodName").orEmpty() }
     private val episodeIndex by lazy { intent.getIntExtra("episodeIndex", 0) }
+    /** 上次看到这一集的第几毫秒，>0 就接着播 */
+    private val startPositionMs by lazy { intent.getLongExtra("startPositionMs", 0L) }
     private val siteKey by lazy { intent.getStringExtra("siteKey").orEmpty() }
     private val vodId by lazy { intent.getStringExtra("vodId").orEmpty() }
     private val vodPic by lazy { intent.getStringExtra("vodPic").orEmpty() }
@@ -72,6 +74,7 @@ class PlayerActivity : AppCompatActivity() {
         val p = ExoPlayer.Builder(this).build()
         p.setMediaItem(MediaItem.fromUri(playUrl))
         p.prepare()
+        if (startPositionMs > 0) p.seekTo(startPositionMs)
         p.playWhenReady = true
         p.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
@@ -147,11 +150,21 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun recordHistory() {
+    private fun recordHistory(positionMs: Long = startPositionMs) {
         lifecycleScope.launch {
             try {
-                repo.recordHistory(vodId, siteKey, vodName, vodPic, episodeIndex)
+                repo.recordHistory(vodId, siteKey, vodName, vodPic, episodeIndex, positionMs)
             } catch (e: Exception) {}
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // 退出/切后台时把进度存下来，下次「继续播放」才能真的接着播
+        player?.let {
+            if (it.isPlaying) it.pause()
+            val pos = it.currentPosition
+            if (pos > 0) recordHistory(pos)
         }
     }
 
