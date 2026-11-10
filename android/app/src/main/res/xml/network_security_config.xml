@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 默认走 HTTPS，影视后端 tv.bcpan.icu 是 HTTPS -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <!-- 部分采集源海报图走 http，图片加载放行明文（仅图片域名） -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">113.137.46.16</domain>
+    </domain-config>
+</network-security-config>

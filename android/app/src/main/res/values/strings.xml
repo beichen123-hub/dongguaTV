@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">冬瓜TV</string>
+    <string name="nav_home">首页</string>
+    <string name="nav_search">搜索</string>
+    <string name="nav_mine">我的</string>
+    <string name="hint_search">搜索影片、剧集、综艺…</string>
+    <string name="action_play">立即播放</string>
+    <string name="action_favorite">收藏</string>
+    <string name="action_follow">追剧</string>
+    <string name="action_share">分享</string>
+    <string name="status_loading">加载中…</string>
+    <string name="status_empty">暂无数据</string>
+    <string name="status_error">加载失败，点击重试</string>
+    <string name="status_network_error">网络连接失败</string>
+    <string name="danmu_on">弹幕开</string>
+    <string name="danmu_off">弹幕关</string>
+</resources>

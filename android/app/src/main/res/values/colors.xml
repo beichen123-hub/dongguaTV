@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- B 方案：暖橙红强调色 -->
+    <color name="colorPrimary">#D85A30</color>
+    <color name="colorPrimaryLight">#F0997B</color>
+    <color name="colorPrimaryDark">#993C1D</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+
+    <!-- 深色主题表面 -->
+    <color name="colorBackground">#1F1F1F</color>
+    <color name="colorSurface">#2A2A2A</color>
+    <color name="colorSurfaceVariant">#3A3A3A</color>
+    <color name="colorNav">#262626</color>
+
+    <!-- 文字层级 -->
+    <color name="textPrimary">#FFFFFF</color>
+    <color name="textSecondary">#9A9A9A</color>
+    <color name="textHint">#6A6A6A</color>
+
+    <!-- 状态 -->
+    <color name="colorError">#E24B4A</color>
+    <color name="colorSuccess">#5DBB63</color>
+    <color name="colorWarning">#E8A33D</color>
+
+    <!-- 弹幕开关、占位等 -->
+    <color name="overlayDim">#80000000</color>
+    <color name="divider">#33FFFFFF</color>
+</resources>
