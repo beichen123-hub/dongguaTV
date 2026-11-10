@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -69,8 +70,18 @@ dependencies {
     // 协程
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // 加密存储（JWT token 存 EncryptedSharedPreferences）
-    implementation("androidx.security:security-crypto:1.0.0")
+    // Room 本地数据库（收藏/历史/追剧）
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
+
+    // Media3 ExoPlayer 播放器
+    implementation("androidx.media3:media3-exoplayer:1.2.1")
+    implementation("androidx.media3:media3-ui:1.2.1")
+    implementation("androidx.media3:media3-common:1.2.1")
+
+    // DanmakuFlameMaster 弹幕引擎
+    implementation("com.github.ctiao:DanmakuFlameMaster:0.9.25")
 
     // 图片加载
     implementation("com.github.bumptech.glide:glide:4.16.0")
