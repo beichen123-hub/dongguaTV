@@ -21,31 +21,102 @@ class Repository private constructor(context: Context) {
 
     // ===== 弹幕（直连公网 danmu_api）=====
     /**
-     * 匹配剧集拿 episodeId，返回 null 表示没匹配到。
-     * danmu_api 的 /api/v2/match 只接受 fileName 字段，且返回体形如：
-     *   {"success":true,"isMatched":true,"matches":[{"episodeId":10002,"animeTitle":"繁花(2023)【电视剧】"}]}
+     * 匹配剧集拿 episodeId，返回 null 表示真没匹配到。
+     *
+     * 实测坑点（都踩过）：
+     * 1. /api/v2/match 只认 fileName 字段，传 keyword/episode 直接 400；
+     * 2. 采集站剧名带营销后缀，如「繁花 国语版」「狂飙[全39集]」，
+     *    原样丢给 match 会匹配失败，得逐个降级清洗；
+     * 3. match 偶发返回 isMatched=false（服务端搜索限流），
+     *    所以再加一条兜底：用 /api/v2/search/episodes 按剧名列出所有集自己挑。
      */
     suspend fun matchDanmaku(keyword: String, episode: Int): String? {
-        val ep = episode.coerceAtLeast(1).toString().padStart(2, '0')
-        val fileName = "$keyword S01E$ep.mp4"
-        val resp = danmuApi.match(MatchRequest(fileName))
+        val ep = episode.coerceAtLeast(1)
+        val candidates = nameCandidates(keyword)
+        for (name in candidates) {
+            tryMatchByFileName(name, ep)?.let { return it }
+        }
+        for (name in candidates) {
+            trySearchEpisodes(name, ep)?.let { return it }
+        }
+        return null
+    }
+
+    /** 剧名降级候选：原名 → 去括号 → 去版本后缀 → 取主标题 */
+    private fun nameCandidates(raw: String): List<String> {
+        val base = raw.trim()
+        if (base.isEmpty()) return emptyList()
+        val noBracket = base.replace(Regex("[\\[【(（].*?[\\]】)）]"), " ")
+        val noVersion = noBracket.replace(
+            Regex("(国语|粤语|沪语|英语|日语|韩语|国语版|粤语版|沪语版|英语版|" +
+                    "TV版|tv版|未删减版|无删减|完整版|高清版|超清|蓝光|中字版|HD|4K)"),
+            " "
+        )
+        val main = noVersion.replace(Regex("\\s+"), " ").trim()
+        val head = main.split(" ", "-", "：", ":").firstOrNull()?.trim().orEmpty()
+        return listOf(base, noBracket.trim(), main, head)
+            .map { it.replace(Regex("\\s+"), " ").trim() }
+            .filter { it.isNotEmpty() && it.length >= 2 }
+            .distinct()
+            .take(4)
+    }
+
+    private suspend fun tryMatchByFileName(name: String, ep: Int): String? = try {
+        val padded = ep.toString().padStart(2, '0')
+        // 剧集用 SxxExx；第 1 集额外用纯文件名兜一次（单片电影走这条）
+        val names = if (ep <= 1) listOf("$name S01E$padded.mp4", "$name.mp4")
+        else listOf("$name S01E$padded.mp4")
+        var found: String? = null
+        for (fn in names) {
+            val resp = danmuApi.match(MatchRequest(fn))
+            if (!resp.isSuccessful) continue
+            val body = resp.body()?.string() ?: continue
+            val json = JSONObject(body)
+            if (!json.optBoolean("success", false) || !json.optBoolean("isMatched", false)) continue
+            val matches = json.optJSONArray("matches") ?: continue
+            if (matches.length() == 0) continue
+            val id = matches.optJSONObject(0)?.optString("episodeId").orEmpty()
+            if (id.isNotBlank()) { found = id; break }
+        }
+        found
+    } catch (e: Exception) {
+        null
+    }
+
+    /** 兜底：按剧名搜到番剧，再从集列表里挑第 ep 集 */
+    private suspend fun trySearchEpisodes(name: String, ep: Int): String? = try {
+        val resp = danmuApi.searchEpisodes(name)
         if (!resp.isSuccessful) return null
         val body = resp.body()?.string() ?: return null
-        return try {
-            val json = JSONObject(body)
-            if (!json.optBoolean("success", false) || !json.optBoolean("isMatched", false)) {
-                null
-            } else {
-                val matches = json.optJSONArray("matches")
-                var id: String? = null
-                if (matches != null && matches.length() > 0) {
-                    id = matches.optJSONObject(0)?.optString("episodeId")
+        val animes = JSONObject(body).optJSONArray("animes") ?: return null
+        var picked: String? = null
+        for (i in 0 until animes.length()) {
+            val anime = animes.optJSONObject(i) ?: continue
+            val title = anime.optString("animeTitle")
+            // 标题里得含剧名，且尽量避开动漫/综艺（同名真人剧优先）
+            if (!title.replace(" ", "").contains(name.replace(" ", ""))) continue
+            val isCartoon = title.contains("动漫") || title.contains("综艺")
+            val episodes = anime.optJSONArray("episodes") ?: continue
+            if (episodes.length() == 0) continue
+            var epId = ""
+            for (j in 0 until episodes.length()) {
+                val e = episodes.optJSONObject(j) ?: continue
+                if (e.optString("episodeTitle").contains("第${ep}集")) {
+                    epId = e.optString("episodeId"); break
                 }
-                id?.takeIf { it.isNotBlank() }
             }
-        } catch (e: Exception) {
-            null
+            if (epId.isEmpty()) {
+                val idx = (ep - 1).coerceIn(0, episodes.length() - 1)
+                epId = episodes.optJSONObject(idx)?.optString("episodeId").orEmpty()
+            }
+            if (epId.isNotBlank()) {
+                picked = epId
+                if (!isCartoon) break   // 真人剧优先，命中就不找了
+            }
         }
+        picked
+    } catch (e: Exception) {
+        null
     }
 
     /** 拿弹幕 XML（B 站标准格式，单集常见 3-4MB / 4 万条） */

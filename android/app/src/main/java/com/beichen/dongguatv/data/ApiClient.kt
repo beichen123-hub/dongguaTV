@@ -57,6 +57,10 @@ interface DanmuApi {
     @retrofit2.http.POST("api/v2/match")
     suspend fun match(@Body body: MatchRequest): Response<okhttp3.ResponseBody>
 
+    /** 兜底：按剧名搜索，返回该番剧下所有集的 episodeId */
+    @GET("api/v2/search/episodes")
+    suspend fun searchEpisodes(@Query("anime") anime: String): Response<okhttp3.ResponseBody>
+
     @GET("api/v2/comment/{id}")
     suspend fun comment(
         @Path("id") id: String,

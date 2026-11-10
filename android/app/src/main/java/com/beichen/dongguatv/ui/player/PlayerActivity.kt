@@ -55,6 +55,26 @@ class PlayerActivity : AppCompatActivity() {
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_READY) binding.loading.visibility = View.GONE
             }
+
+            // 拖动进度条后弹幕时间轴要跟着重排，否则往前拖就没有弹幕了
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
+            ) {
+                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                    binding.danmakuView.onSeek(newPosition.positionMs)
+                }
+            }
+
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                binding.loading.visibility = View.GONE
+                android.widget.Toast.makeText(
+                    this@PlayerActivity,
+                    "播放失败：${error.errorCodeName}（换条线路试试）",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+            }
         })
         binding.playerView.player = p
         // 弹幕时间轴绑定到播放器
