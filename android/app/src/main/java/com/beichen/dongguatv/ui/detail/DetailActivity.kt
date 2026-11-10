@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.beichen.dongguatv.data.PlayLine
 import com.beichen.dongguatv.data.PlayUrlParser
 import com.beichen.dongguatv.data.Repository
 import com.beichen.dongguatv.data.VodDetail
@@ -24,7 +25,7 @@ class DetailActivity : AppCompatActivity() {
     private val vodName by lazy { intent.getStringExtra("vodName").orEmpty() }
 
     private var detail: VodDetail? = null
-    private var playLines: List<PlayUrlParser.PlayLine> = emptyList()
+    private var playLines: List<PlayLine> = emptyList()
     private var currentLine: Int = 0
     private val episodeAdapter = EpisodeAdapter { ep ->
         play(ep.index)
