@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:resize_mode="fit"
+        app:use_controller="true"
+        app:show_buffering="when_playing" />
+
+    <!-- 弹幕叠加层：覆盖在播放器之上，不挡底部控制条（底部留 64dp） -->
+    <com.beichen.dongguatv.player.danmaku.DanmakuView
+        android:id="@+id/danmakuView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="64dp" />
+
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="12dp"
+        android:src="@drawable/ic_back"
+        android:background="@drawable/bg_circle_alpha"
+        android:padding="8dp"
+        android:layout_gravity="top|start" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDanmaku"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="12dp"
+        android:text="弹幕开"
+        android:minWidth="0dp"
+        android:textSize="12sp"
+        app:backgroundTint="@color/colorPrimary" />
+
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:indeterminateTint="@color/colorPrimary" />
+
+</FrameLayout>

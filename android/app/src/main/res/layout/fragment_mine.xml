@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorBackground"
+        app:title="我的"
+        app:titleTextColor="@color/textPrimary"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLocal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="本地数据（不跨设备同步）"
+        android:textColor="@color/textSecondary"
+        android:textSize="13sp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardFavorite"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:cardBackgroundColor="@color/colorSurface"
+        app:cardCornerRadius="12dp"
+        app:layout_constraintTop_toBottomOf="@id/tvLocal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cardHistory">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp">
+            <TextView android:id="@+id/tvFavCount"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0" android:textColor="@color/colorPrimary"
+                android:textSize="24sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="收藏" android:textColor="@color/textSecondary" android:textSize="13sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardHistory"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:cardBackgroundColor="@color/colorSurface"
+        app:cardCornerRadius="12dp"
+        app:layout_constraintTop_toBottomOf="@id/tvLocal"
+        app:layout_constraintStart_toEndOf="@id/cardFavorite"
+        app:layout_constraintEnd_toEndOf="parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp">
+            <TextView android:id="@+id/tvHisCount"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0" android:textColor="@color/colorPrimary"
+                android:textSize="24sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="历史" android:textColor="@color/textSecondary" android:textSize="13sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardFollow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:cardBackgroundColor="@color/colorSurface"
+        app:cardCornerRadius="12dp"
+        app:layout_constraintTop_toBottomOf="@id/cardFavorite">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="我的追剧" android:textColor="@color/textPrimary" android:textSize="15sp" />
+            <TextView android:id="@+id/tvFollowCount"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 部" android:textColor="@color/textSecondary" android:textSize="13sp"
+                android:layout_marginEnd="8dp" />
+            <TextView android:id="@+id/tvFollowUpdate"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="" android:textColor="@color/colorPrimary" android:textSize="12sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/tvHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="收藏/历史/追剧列表页将在阶段3完善，当前已可写入数据。"
+        android:textColor="@color/textHint"
+        android:textSize="12sp"
+        app:layout_constraintTop_toBottomOf="@id/cardFollow" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

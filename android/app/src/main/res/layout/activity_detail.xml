@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorBackground">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_back"
+            app:titleTextColor="@color/textPrimary" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+                <ImageView
+                    android:id="@+id/ivPoster"
+                    android:layout_width="120dp"
+                    android:layout_height="170dp"
+                    android:scaleType="centerCrop"
+                    android:background="@color/colorSurfaceVariant" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+                    <TextView android:id="@+id/tvTitle"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/textPrimary" android:textSize="18sp"
+                        android:textStyle="bold" />
+                    <TextView android:id="@+id/tvMeta"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="@color/textSecondary" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvRemarks"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="@color/colorPrimary" android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="12dp">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPlay"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:text="立即播放"
+                    android:layout_marginEnd="8dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFavorite"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="收藏" android:layout_marginEnd="8dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFollow"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="追剧" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="简介" android:textColor="@color/textPrimary"
+                android:textSize="15sp" android:textStyle="bold"
+                android:paddingHorizontal="16dp" />
+            <TextView android:id="@+id/tvContent"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="@color/textSecondary" android:textSize="13sp"
+                android:lineSpacingExtra="4dp"
+                android:padding="16dp" />
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLines"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabTextColor="@color/textSecondary"
+                app:tabSelectedTextColor="@color/colorPrimary"
+                app:tabIndicatorColor="@color/colorPrimary" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/gridEpisodes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:nestedScrollingEnabled="false" />
+
+            <ProgressBar
+                android:id="@+id/loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="24dp"
+                android:indeterminateTint="@color/colorPrimary"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
