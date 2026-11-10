@@ -48,8 +48,8 @@ class Repository private constructor(context: Context) {
         if (base.isEmpty()) return emptyList()
         val noBracket = base.replace(Regex("[\\[【(（].*?[\\]】)）]"), " ")
         val noVersion = noBracket.replace(
-            Regex("(国语|粤语|沪语|英语|日语|韩语|国语版|粤语版|沪语版|英语版|" +
-                    "TV版|tv版|未删减版|无删减|完整版|高清版|超清|蓝光|中字版|HD|4K)"),
+            Regex("(国语版|粤语版|沪语版|英语版|TV版|tv版|未删减版|无删减|完整版|高清版|中字版|" +
+                    "国语|粤语|沪语|英语|日语|韩语|中字|超清|蓝光|HD|4K)"),
             " "
         )
         val main = noVersion.replace(Regex("\\s+"), " ").trim()
