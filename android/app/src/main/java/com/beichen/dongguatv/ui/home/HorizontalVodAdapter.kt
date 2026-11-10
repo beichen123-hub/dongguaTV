@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.beichen.dongguatv.R
+import com.beichen.dongguatv.data.NameUtil
 import com.beichen.dongguatv.data.VodItem
 import com.beichen.dongguatv.databinding.ItemVodHorizontalBinding
 import com.bumptech.glide.Glide
@@ -30,7 +31,7 @@ class HorizontalVodAdapter(
         val item = items[position]
         val ctx = holder.itemView.context
         with(holder.binding) {
-            tvName.text = item.vod_name
+            tvName.text = NameUtil.display(item.vod_name).ifBlank { item.vod_name }
             tvRemarks.text = item.vod_remarks
             tvRemarks.visibility =
                 if (item.vod_remarks.isBlank()) android.view.View.GONE else android.view.View.VISIBLE

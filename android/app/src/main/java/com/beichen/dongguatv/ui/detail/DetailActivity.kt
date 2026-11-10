@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.beichen.dongguatv.R
+import com.beichen.dongguatv.data.NameUtil
 import com.beichen.dongguatv.data.PlayLine
 import com.beichen.dongguatv.data.PlayUrlParser
 import com.beichen.dongguatv.data.Repository
@@ -21,9 +22,11 @@ class DetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailBinding
     private val repo by lazy { Repository.get(this) }
-    private val siteKey by lazy { intent.getStringExtra("siteKey").orEmpty() }
-    private val vodId by lazy { intent.getStringExtra("vodId").orEmpty() }
-    private val vodName by lazy { intent.getStringExtra("vodName").orEmpty() }
+
+    // 换源要能改，所以这几个不能是 val
+    private var siteKey: String = ""
+    private var vodId: String = ""
+    private var vodName: String = ""
 
     private var detail: VodDetail? = null
     private var playLines: List<PlayLine> = emptyList()
@@ -39,6 +42,9 @@ class DetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        siteKey = intent.getStringExtra("siteKey").orEmpty()
+        vodId = intent.getStringExtra("vodId").orEmpty()
+        vodName = intent.getStringExtra("vodName").orEmpty()
         title = vodName
         binding.toolbar.setNavigationOnClickListener { finish() }
 
@@ -65,6 +71,8 @@ class DetailActivity : AppCompatActivity() {
     private fun loadDetail() {
         binding.loading.visibility = android.view.View.VISIBLE
         binding.tvError.visibility = android.view.View.GONE
+        resumeIndex = 0
+        binding.btnPlay.text = "立即播放"
         lifecycleScope.launch {
             try {
                 val resp = repo.detail(siteKey, vodId)
@@ -92,6 +100,7 @@ class DetailActivity : AppCompatActivity() {
                     resumeIndex = lastEp
                     binding.btnPlay.text = "继续播放 第${lastEp + 1}集"
                 }
+                loadSourceChips(d)
             } catch (e: Exception) {
                 showError("加载失败：${e.message ?: "网络异常"}\n点这里重试")
             } finally {
@@ -136,6 +145,74 @@ class DetailActivity : AppCompatActivity() {
             putExtra("vodId", d.vod_id)
             putExtra("vodPic", d.vod_pic)
         })
+    }
+
+    /**
+     * 换源：搜同名剧，把其它站点的可用源列成一行 chips。
+     * 一条源播不动时，直接在这里换，比退回列表重新搜快得多。
+     */
+    private fun loadSourceChips(item: VodDetail) {
+        binding.sourceRow.removeAllViews()
+        binding.sourceRow.visibility = android.view.View.GONE
+        lifecycleScope.launch {
+            try {
+                val key = NameUtil.key(item.vod_name)
+                val others = repo.search(item.vod_name).list
+                    .filter { NameUtil.key(it.vod_name) == key }
+                    .distinctBy { it.site_key }
+                if (others.size <= 1) return@launch
+                binding.sourceRow.visibility = android.view.View.VISIBLE
+                others.forEach { vod ->
+                    binding.sourceRow.addView(buildSourceChip(vod, vod.site_key == siteKey))
+                }
+            } catch (e: Exception) {
+                // 换源列表拉不到不影响看剧
+            }
+        }
+    }
+
+    private fun buildSourceChip(vod: VodItem, isCurrent: Boolean): android.view.View {
+        val density = resources.displayMetrics.density
+        val chip = com.google.android.material.button.MaterialButton(this)
+        chip.text = vod.site_name.ifBlank { vod.site_key }
+        chip.textSize = 12f
+        chip.isAllCaps = false
+        chip.minWidth = 0
+        chip.insetTop = 0
+        chip.insetBottom = 0
+        chip.setPaddingRelative((10 * density).toInt(), 0, (10 * density).toInt(), 0)
+        val lp = android.widget.LinearLayout.LayoutParams(
+            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        lp.marginEnd = (8 * density).toInt()
+        chip.layoutParams = lp
+        val primary = androidx.core.content.ContextCompat.getColor(this, R.color.colorPrimary)
+        val surface = androidx.core.content.ContextCompat.getColor(this, R.color.colorSurface)
+        val onSurface = androidx.core.content.ContextCompat.getColor(this, R.color.textPrimary)
+        chip.backgroundTintList =
+            android.content.res.ColorStateList.valueOf(if (isCurrent) primary else surface)
+        chip.setTextColor(if (isCurrent) android.graphics.Color.WHITE else onSurface)
+        chip.strokeWidth = (1 * density).toInt()
+        chip.strokeColor = android.content.res.ColorStateList.valueOf(primary)
+        chip.setOnClickListener { if (!isCurrent) switchSource(vod) }
+        return chip
+    }
+
+    private fun switchSource(vod: VodItem) {
+        siteKey = vod.site_key
+        vodId = vod.vod_id
+        vodName = vod.vod_name
+        title = vodName
+        playLines = emptyList()
+        currentLine = 0
+        binding.tabLines.removeAllTabs()
+        episodeAdapter.submit(emptyList())
+        loadDetail()
+        android.widget.Toast.makeText(
+            this, "已切到 ${vod.site_name.ifBlank { vod.site_key }}",
+            android.widget.Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun toggleFavorite() {

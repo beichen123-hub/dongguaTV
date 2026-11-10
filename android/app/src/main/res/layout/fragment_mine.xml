@@ -102,6 +102,28 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardDiag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:cardBackgroundColor="@color/colorSurface"
+        app:cardCornerRadius="12dp"
+        app:layout_constraintTop_toBottomOf="@id/cardFollow">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="服务自检" android:textColor="@color/textPrimary" android:textSize="15sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="点一下测影视后端和弹幕服务通不通（播不了时先来这儿看）"
+                android:textColor="@color/textHint" android:textSize="12sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
     <TextView
         android:id="@+id/tvHint"
         android:layout_width="match_parent"
@@ -110,6 +132,6 @@
         android:text="收藏 / 历史 / 追剧都保存在本机，不上传服务器。长按列表项可删除。"
         android:textColor="@color/textHint"
         android:textSize="12sp"
-        app:layout_constraintTop_toBottomOf="@id/cardFollow" />
+        app:layout_constraintTop_toBottomOf="@id/cardDiag" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

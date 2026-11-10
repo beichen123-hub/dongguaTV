@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.beichen.dongguatv.R
+import com.beichen.dongguatv.data.NameUtil
 import com.beichen.dongguatv.data.Repository
 import com.beichen.dongguatv.data.VodItem
 import com.beichen.dongguatv.databinding.FragmentHomeBinding
@@ -93,7 +94,8 @@ class HomeFragment : Fragment() {
     /** 加一行推荐：标题 + 横向海报列表 */
     private fun addSection(keyword: String, list: List<VodItem>) {
         val ctx = context ?: return
-        val unique = list.distinctBy { it.vod_name }.take(14)
+        // 按归一化剧名去重：否则「繁花 国语版 / 沪语版 / 剧版」会占满一行
+        val unique = list.distinctBy { NameUtil.key(it.vod_name) }.take(14)
         if (unique.isEmpty()) return
 
         val rowBinding = SectionVodRowBinding.inflate(
