@@ -80,8 +80,8 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.2.1")
     implementation("androidx.media3:media3-common:1.2.1")
 
-    // DanmakuFlameMaster 弹幕引擎
-    implementation("com.github.ctiao:DanmakuFlameMaster:0.9.25")
+    // 弹幕：DanmakuFlameMaster jitpack 无 0.9.25 可用版本，0.3.5 与 AndroidX 冲突。
+    // 改用自绘方案（自定义 View + B站XML解析），不依赖第三方库，后续在 player 模块实现。
 
     // 图片加载
     implementation("com.github.bumptech.glide:glide:4.16.0")
