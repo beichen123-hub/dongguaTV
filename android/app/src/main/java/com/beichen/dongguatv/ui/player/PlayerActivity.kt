@@ -8,6 +8,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.beichen.dongguatv.data.Repository
+import com.beichen.dongguatv.data.SourceResolver
 import com.beichen.dongguatv.databinding.ActivityPlayerBinding
 import com.beichen.dongguatv.player.danmaku.BiliDanmakuParser
 import com.beichen.dongguatv.player.danmaku.DanmakuView
@@ -56,8 +57,20 @@ class PlayerActivity : AppCompatActivity() {
     private fun setupPlayer() {
         if (url.isBlank()) return
         binding.loading.visibility = View.VISIBLE
+        // 采集源多数给的是分享页，先解析出 m3u8 直链再喂 ExoPlayer
+        lifecycleScope.launch {
+            val direct = SourceResolver.resolve(url)
+            if (direct == null) {
+                playInWebView()
+            } else {
+                startNative(direct)
+            }
+        }
+    }
+
+    private fun startNative(playUrl: String) {
         val p = ExoPlayer.Builder(this).build()
-        p.setMediaItem(MediaItem.fromUri(url))
+        p.setMediaItem(MediaItem.fromUri(playUrl))
         p.prepare()
         p.playWhenReady = true
         p.addListener(object : Player.Listener {
@@ -92,13 +105,41 @@ class PlayerActivity : AppCompatActivity() {
         player = p
     }
 
+    /** 解析不出直链的源：用内置浏览器打开原播放页，页面自带 hls.js 能播（无弹幕） */
+    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    private fun playInWebView() {
+        binding.loading.visibility = View.GONE
+        binding.playerView.visibility = View.GONE
+        binding.danmakuView.visibility = View.GONE
+        binding.btnDanmaku.visibility = View.GONE
+        binding.webPlayer.visibility = View.VISIBLE
+        binding.webPlayer.setBackgroundColor(android.graphics.Color.BLACK)
+        binding.webPlayer.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            mediaPlaybackRequiresUserGesture = false
+            loadWithOverviewMode = true
+            useWideViewPort = true
+            userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 " +
+                    "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+        }
+        binding.webPlayer.webChromeClient = android.webkit.WebChromeClient()
+        binding.webPlayer.loadUrl(url)
+        android.widget.Toast.makeText(
+            this, "这个源要给播放页才能播，已切内置浏览器（无弹幕）", android.widget.Toast.LENGTH_LONG
+        ).show()
+    }
+
     private fun loadDanmaku() {
         if (vodName.isBlank()) return
         lifecycleScope.launch {
             try {
                 val episodeId = repo.matchDanmaku(vodName, episodeIndex + 1) ?: return@launch
                 val xml = repo.getDanmakuXml(episodeId) ?: return@launch
-                val items = BiliDanmakuParser.parse(xml)
+                // 4 万条 XML 解析必须离开主线程，否则进播放器会卡 1-2 秒
+                val items = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    BiliDanmakuParser.parse(xml)
+                }
                 binding.danmakuView.setSource(items)
             } catch (e: Exception) {
                 // 弹幕加载失败不影响播放
@@ -119,5 +160,11 @@ class PlayerActivity : AppCompatActivity() {
         binding.danmakuView.stopLoop()
         player?.release()
         player = null
+        // WebView 兜底模式要显式销毁，否则音频可能还在后台响
+        binding.webPlayer.apply {
+            stopLoading()
+            loadUrl("about:blank")
+            destroy()
+        }
     }
 }

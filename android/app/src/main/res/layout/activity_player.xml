@@ -42,6 +42,15 @@
         android:textSize="12sp"
         app:backgroundTint="@color/colorPrimary" />
 
+    <!-- 兜底：采集源给的是分享页/播放页、抠不出 m3u8 时，
+         直接用内置浏览器打开原页面（页面自带 hls.js 能播，代价是没有弹幕） -->
+    <WebView
+        android:id="@+id/webPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:visibility="gone" />
+
     <ProgressBar
         android:id="@+id/loading"
         android:layout_width="wrap_content"
