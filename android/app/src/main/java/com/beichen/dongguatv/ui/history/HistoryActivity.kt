@@ -13,6 +13,7 @@ import com.beichen.dongguatv.R
 import com.beichen.dongguatv.data.Repository
 import com.beichen.dongguatv.databinding.ActivityListBinding
 import com.beichen.dongguatv.ui.common.LocalItem
+import com.beichen.dongguatv.ui.common.LocalListAdapter
 import com.beichen.dongguatv.ui.detail.DetailActivity
 import kotlinx.coroutines.launch
 
