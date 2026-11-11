@@ -17,6 +17,9 @@ object ApiClient {
     private const val TV_BASE = "https://tv.bcpan.icu/"
     private const val DANMU_BASE = "http://113.137.46.16:19321/87654321/"
 
+    /** TMDb 国内代理（与原版 Web 首页同源），负责海报/榜单等元数据 */
+    private const val TMDB_BASE = "https://daili.smdhb.com/"
+
     private fun okClient(): OkHttpClient {
         val log = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
         return OkHttpClient.Builder()
