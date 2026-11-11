@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hero 轮播单页：大背景图 + 底部渐变 + 标签/标题/简介/播放按钮（对标 Web 首页 heroCarousel） -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorSurfaceVariant">
+
+    <ImageView
+        android:id="@+id/ivBackdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_hero_gradient" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_tag_chip"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:textColor="@color/colorOnPrimary"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/textPrimary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvOverview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/textSecondary"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/btnPlay"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_play_button"
+            android:drawableStart="@drawable/ic_play_arrow"
+            android:drawablePadding="4dp"
+            android:gravity="center"
+            android:paddingStart="18dp"
+            android:paddingEnd="22dp"
+            android:text="@string/action_play"
+            android:textColor="@color/colorOnPrimary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</FrameLayout>

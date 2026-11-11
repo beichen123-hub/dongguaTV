@@ -37,6 +37,7 @@ object ApiClient {
 
     val tvApi: TvApi by lazy { buildRetrofit(TV_BASE).create(TvApi::class.java) }
     val danmuApi: DanmuApi by lazy { buildRetrofit(DANMU_BASE).create(DanmuApi::class.java) }
+    val tmdbApi: TmdbApi by lazy { buildRetrofit(TMDB_BASE).create(TmdbApi::class.java) }
 }
 
 interface TvApi {
