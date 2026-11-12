@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 评分徽章：半透明黑底圆角胶囊，叠在海报左下角 -->
+<!-- 玻璃感评分徽章：磨砂暗底 + 细白高光边框 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#CC1A1A1A" />
-    <corners android:radius="6dp" />
+    <solid android:color="#B312151E" />
+    <stroke android:width="0.8dp" android:color="#33FFFFFF" />
+    <corners android:radius="8dp" />
 </shape>

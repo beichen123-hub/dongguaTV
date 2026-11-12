@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Hero banner 底部黑色渐变遮罩：上透明下深，保证白字在任何背景图上可读 -->
+<!-- Hero banner 多段遮罩：顶部微压暗护状态栏，底部平稳融进 #0B0D13 主背景 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
         android:angle="270"
-        android:startColor="#00000000"
-        android:centerColor="#66000000"
-        android:endColor="#E6101010" />
+        android:startColor="#800B0D13"
+        android:centerColor="#260B0D13"
+        android:endColor="#FF0B0D13" />
 </shape>

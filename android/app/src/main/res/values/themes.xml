@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- 基础深色主题（Material3） -->
+    <!-- 基础深色主题（Material3 影院级 Liquid Glass） -->
     <style name="Theme.Dongguatv" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
@@ -13,14 +13,22 @@
         <item name="colorOnSurface">@color/textPrimary</item>
         <item name="colorError">@color/colorError</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorNav</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
     </style>
 
     <!-- 启动闪屏（避免白屏） -->
     <style name="Theme.Dongguatv.Splash" parent="Theme.Dongguatv">
         <item name="android:windowBackground">@color/colorBackground</item>
+    </style>
+
+    <!-- 液态玻璃底部导航 Active 指示器（隐藏丑陋实心椭圆，用微透玻璃胶囊） -->
+    <style name="GlassNavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#29FF6B3D</item>
+        <item name="android:width">56dp</item>
+        <item name="android:height">32dp</item>
     </style>
 
 </resources>

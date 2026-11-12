@@ -37,7 +37,7 @@ class HorizontalVodAdapter(
                 if (item.vod_remarks.isBlank()) android.view.View.GONE else android.view.View.VISIBLE
             Glide.with(ctx)
                 .load(item.vod_pic)
-                .transform(CenterCrop(), RoundedCorners(12))
+                .transform(CenterCrop())
                 .placeholder(R.color.colorSurfaceVariant)
                 .error(R.color.colorSurfaceVariant)
                 .into(ivPoster)

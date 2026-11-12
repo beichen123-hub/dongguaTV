@@ -40,7 +40,7 @@ class ShelfPosterAdapter(
             }
             Glide.with(ctx)
                 .load(item.posterUrl())
-                .transform(CenterCrop(), RoundedCorners(14))
+                .transform(CenterCrop())
                 .placeholder(R.color.colorSurfaceVariant)
                 .error(R.color.colorSurfaceVariant)
                 .into(ivPoster)

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Hero 顶部"本周 TOP"小标签底色：强调色圆角小块 -->
+<!-- Hero TOP 标签：半透明橙红玻璃徽章 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/colorPrimary" />
-    <corners android:radius="4dp" />
+    <gradient
+        android:angle="0"
+        android:startColor="#CCFF6B3D"
+        android:endColor="#AAFF8F66" />
+    <stroke android:width="0.8dp" android:color="#66FFFFFF" />
+    <corners android:radius="8dp" />
 </shape>

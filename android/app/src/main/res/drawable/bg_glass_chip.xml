@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 液态玻璃小胶囊（未选中：站点、分集、热搜词、调节选项） -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#30FFFFFF"
+                android:endColor="#0EFFFFFF" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item
+        android:top="1dp"
+        android:left="1dp"
+        android:right="1dp"
+        android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#991A1E2B" />
+            <corners android:radius="11dp" />
+        </shape>
+    </item>
+</layer-list>

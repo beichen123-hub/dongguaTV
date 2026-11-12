@@ -3,10 +3,12 @@ package com.beichen.dongguatv.ui.search
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.beichen.dongguatv.R
 import com.beichen.dongguatv.data.NameUtil
 import com.beichen.dongguatv.data.VodItem
 import com.beichen.dongguatv.databinding.ItemSearchResultBinding
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 
 /**
  * 搜索结果适配器（按剧名聚合）。
@@ -50,7 +52,12 @@ class SearchResultAdapter(
             tvName.text = NameUtil.display(item.vod_name).ifBlank { item.vod_name }
             tvRemarks.text = item.vod_remarks
             tvSite.text = if (group.count > 1) "$site · ${group.count}源" else site
-            Glide.with(ivPoster).load(item.vod_pic).into(ivPoster)
+            Glide.with(ivPoster)
+                .load(item.vod_pic)
+                .transform(CenterCrop())
+                .placeholder(R.color.colorSurfaceVariant)
+                .error(R.color.colorSurfaceVariant)
+                .into(ivPoster)
             root.setOnClickListener { onClick(item) }
         }
     }

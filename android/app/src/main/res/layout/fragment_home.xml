@@ -1,126 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:orientation="vertical">
+    android:background="@drawable/bg_ambient_canvas">
 
-    <!-- 顶部标题 -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="104dp">
+
+            <LinearLayout
+                android:id="@+id/sectionContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- 沉浸式 Hero 轮播：顶入状态栏下方 -->
+                <FrameLayout
+                    android:id="@+id/bannerWrap"
+                    android:layout_width="match_parent"
+                    android:layout_height="336dp">
+
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/vpHero"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <LinearLayout
+                        android:id="@+id/dotsContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|end"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="22dp"
+                        android:gravity="center"
+                        android:orientation="horizontal" />
+                </FrameLayout>
+
+                <!-- 各榜单行运行时动态添加 -->
+                <LinearLayout
+                    android:id="@+id/shelfContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- 顶部悬浮透明导航栏 + 液态玻璃搜索胶囊 -->
     <LinearLayout
+        android:id="@+id/topFloatingBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="top"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingTop="14dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="8dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="38dp"
+        android:paddingBottom="10dp">
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="6"
             android:text="@string/app_name"
             android:textColor="@color/textPrimary"
             android:textSize="20sp"
             android:textStyle="bold" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/home_pull_refresh"
-            android:textColor="@color/textHint"
-            android:textSize="11sp" />
+            android:id="@+id/tvSearchEntry"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_glass_pill"
+            android:drawableStart="@drawable/ic_search"
+            android:drawablePadding="8dp"
+            android:drawableTint="@color/textSecondary"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:paddingHorizontal="14dp"
+            android:text="@string/hint_search"
+            android:textColor="@color/textSecondary"
+            android:textSize="12sp" />
     </LinearLayout>
 
-    <!-- 搜索入口 -->
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/colorPrimary" />
+
     <TextView
-        android:id="@+id/tvSearchEntry"
-        android:layout_width="match_parent"
-        android:layout_height="42dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="6dp"
-        android:background="@drawable/bg_search_bar"
-        android:drawableStart="@drawable/ic_search"
-        android:drawablePadding="8dp"
-        android:drawableTint="@color/textHint"
-        android:gravity="center_vertical"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
-        android:text="@string/hint_search"
-        android:textColor="@color/textHint"
-        android:textSize="13sp" />
+        android:id="@+id/tvEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="24dp"
+        android:textColor="@color/textSecondary"
+        android:textSize="14sp"
+        android:visibility="gone" />
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/refresh"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <androidx.core.widget.NestedScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false">
-
-                <LinearLayout
-                    android:id="@+id/sectionContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingBottom="20dp">
-
-                    <!-- Hero 轮播：大背景图 + 底部圆点指示器（对标 Web heroCarousel） -->
-                    <FrameLayout
-                        android:id="@+id/bannerWrap"
-                        android:layout_width="match_parent"
-                        android:layout_height="220dp">
-
-                        <androidx.viewpager2.widget.ViewPager2
-                            android:id="@+id/vpHero"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent" />
-
-                        <LinearLayout
-                            android:id="@+id/dotsContainer"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom|center_horizontal"
-                            android:layout_marginBottom="10dp"
-                            android:gravity="center"
-                            android:orientation="horizontal" />
-                    </FrameLayout>
-
-                    <!-- 各榜单行运行时动态添加 -->
-                    <LinearLayout
-                        android:id="@+id/shelfContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
-                </LinearLayout>
-            </androidx.core.widget.NestedScrollView>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-        <ProgressBar
-            android:id="@+id/loading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminateTint="@color/colorPrimary" />
-
-        <TextView
-            android:id="@+id/tvEmpty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:padding="24dp"
-            android:textColor="@color/textSecondary"
-            android:textSize="14sp"
-            android:visibility="gone" />
-    </FrameLayout>
-
-</LinearLayout>
+</FrameLayout>

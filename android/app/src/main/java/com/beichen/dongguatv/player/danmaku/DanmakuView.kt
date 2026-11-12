@@ -1,6 +1,5 @@
 package com.beichen.dongguatv.player.danmaku
 
-import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -9,13 +8,12 @@ import android.util.AttributeSet
 import android.view.Choreographer
 import android.view.View
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 /**
- * 自绘弹幕组件。零第三方依赖。
- * - 滚动/顶部/底部三种弹幕
- * - 时间轴由外部播放器提供（bindTimeProvider）
- * - 倍速跟随播放器
- * - 轨道自动分配，防重叠
+ * 自绘弹幕组件（零第三方依赖）。
+ * 支持滚动/顶部/底部弹幕、时间轴同步、倍速跟随，以及实时可调的：
+ * 显示区域占比（1/4~全屏）、透明度、字体大小、弹幕速度、顶/底屏蔽。
  */
 class DanmakuView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -24,35 +22,39 @@ class DanmakuView @JvmOverloads constructor(
     private var source: List<DanmakuItem> = emptyList()
     private var visible: Boolean = true
     private var speed: Float = 1f
+    private var displayAreaRatio: Float = 0.50f
+    private var alphaRatio: Float = 0.85f
+    private var fontScale: Float = 1.0f
+    private var showTop: Boolean = true
+    private var showBottom: Boolean = true
     private var timeProvider: () -> Long = { 0L }
 
     // 轨道
     private var trackHeight: Float = 0f
     private var trackCount: Int = 0
-    private var scrollNextAvail: FloatArray = FloatArray(0)  // 每轨道"可放下一条的时间(秒)"
-    private var fixedNextAvail: FloatArray = FloatArray(0)   // 顶部+底部共用
+    private var scrollNextAvail: FloatArray = FloatArray(0)
+    private var fixedNextAvail: FloatArray = FloatArray(0)
 
     // 活跃弹幕
     private val activeScroll = ArrayList<ActiveScroll>(64)
     private val activeFixed = ArrayList<ActiveFixed>(32)
-    private var spawnIndex: Int = 0   // source 已 spawn 到第几个
+    private var spawnIndex: Int = 0
 
     // 绘制参数
     private val density = resources.displayMetrics.density
-    private var baseFontSize: Float = 16f * density
-    private val scrollSpeedPxPerSec: Float get() = 140f * density * speed  // 滚动速度
-    private val fixedDurationSec: Float get() = 5f   // 顶/底弹幕停留秒数
+    private val baseFontSize: Float get() = 16f * fontScale * density
+    private val scrollSpeedPxPerSec: Float get() = 140f * density * speed
+    private val fixedDurationSec: Float get() = 5f
 
-    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL_AND_STROKE
-        strokeWidth = density * 1.2f
+    private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = density * 2.2f
+        strokeJoin = Paint.Join.ROUND
     }
-    private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = Color.argb(40, 0, 0, 0)
     }
 
-    // 上一次 frame 时间，用于判断是否需要继续刷新
     private var lastDrawSec: Float = -1f
     private val frameCallback = object : Choreographer.FrameCallback {
         override fun doFrame(frameTimeNanos: Long) {
@@ -67,17 +69,44 @@ class DanmakuView @JvmOverloads constructor(
         }
     }
 
-    /** 绑定播放器时间源（毫秒）。PlayerActivity: danmakuView.bindTimeProvider { player.currentPosition } */
     fun bindTimeProvider(provider: () -> Long) { timeProvider = provider }
 
-    /** 设置弹幕源（已解析的列表） */
     fun setSource(items: List<DanmakuItem>) {
         source = items
         reset()
     }
 
+    /** 实时应用弹幕配置，无需重启播放器 */
+    fun applyConfig(cfg: DanmakuConfig) {
+        val areaChanged = displayAreaRatio != cfg.areaRatio
+        val fontChanged = fontScale != cfg.fontScale
+        visible = cfg.enabled
+        displayAreaRatio = cfg.areaRatio.coerceIn(0.25f, 1.0f)
+        alphaRatio = cfg.alphaRatio.coerceIn(0.15f, 1.0f)
+        fontScale = cfg.fontScale.coerceIn(0.75f, 1.50f)
+        speed = cfg.speedScale.coerceIn(0.70f, 1.60f)
+        showTop = cfg.showTop
+        showBottom = cfg.showBottom
+
+        if (!visible) {
+            activeScroll.clear()
+            activeFixed.clear()
+        } else {
+            if (!showTop) activeFixed.removeAll { it.item.type == DanmakuType.TOP }
+            if (!showBottom) activeFixed.removeAll { it.item.type == DanmakuType.BOTTOM }
+            if (areaChanged || fontChanged) {
+                ensureTracks()
+                // 裁剪超出新显示区域的弹幕，所见即所得
+                activeScroll.removeAll { it.track >= trackCount }
+                activeFixed.removeAll { it.track >= trackCount }
+            }
+        }
+        lastDrawSec = -1f
+        invalidate()
+    }
+
     fun setSpeed(s: Float) { speed = s }
-    fun show() { visible = true }
+    fun show() { visible = true; lastDrawSec = -1f; invalidate() }
     fun hide() {
         visible = false
         activeScroll.clear(); activeFixed.clear()
@@ -88,17 +117,19 @@ class DanmakuView @JvmOverloads constructor(
         return visible
     }
 
-    /** seek 时清屏重排 */
     fun onSeek(positionMs: Long) {
         reset()
-        // spawnIndex 跳到 >= position 的第一条
         val sec = positionMs / 1000f
         spawnIndex = source.indexOfFirst { it.timeSec >= sec }.let { if (it < 0) source.size else it }
+        lastDrawSec = -1f
+        invalidate()
     }
 
     fun startLoop() {
+        Choreographer.getInstance().removeFrameCallback(frameCallback)
         Choreographer.getInstance().postFrameCallback(frameCallback)
     }
+
     fun stopLoop() {
         Choreographer.getInstance().removeFrameCallback(frameCallback)
         activeScroll.clear(); activeFixed.clear()
@@ -111,14 +142,18 @@ class DanmakuView @JvmOverloads constructor(
         ensureTracks()
     }
 
+    private fun effectiveAreaHeight(): Float = height * displayAreaRatio
+
     private fun ensureTracks() {
         if (height == 0) return
-        trackHeight = baseFontSize * 1.5f
-        trackCount = max(1, (height / trackHeight).toInt())
-        if (scrollNextAvail.size != trackCount) {
-            scrollNextAvail = FloatArray(trackCount) { -1f }
-            fixedNextAvail = FloatArray(trackCount) { -1f }
+        trackHeight = baseFontSize * 1.45f
+        val availHeight = max(trackHeight, effectiveAreaHeight())
+        val newCount = max(1, (availHeight / trackHeight).toInt())
+        if (scrollNextAvail.size != newCount) {
+            scrollNextAvail = FloatArray(newCount) { -1f }
+            fixedNextAvail = FloatArray(newCount) { -1f }
         }
+        trackCount = newCount
     }
 
     private fun spawnNew(sec: Float) {
@@ -126,23 +161,33 @@ class DanmakuView @JvmOverloads constructor(
         ensureTracks()
         while (spawnIndex < source.size && source[spawnIndex].timeSec <= sec) {
             val item = source[spawnIndex]
-            spawnOne(item, sec)
+            // seek 刚过去很久的历史弹幕不堆积
+            if (sec - item.timeSec <= 2.0f) {
+                spawnOne(item)
+            }
             spawnIndex++
         }
     }
 
-    private fun spawnOne(item: DanmakuItem, nowSec: Float) {
+    private fun spawnOne(item: DanmakuItem) {
         when (item.type) {
             DanmakuType.SCROLL -> {
                 val w = measureText(item)
-                val track = pickScrollTrack(item.timeSec, w)
-                if (track < 0) return  // 满了，丢弃
-                // 滚动弹幕完全进入屏幕的时间 = 出现时间 + w / speed
-                scrollNextAvail[track] = item.timeSec + w / scrollSpeedPxPerSec
+                val track = pickScrollTrack(item.timeSec)
+                if (track < 0) return
+                scrollNextAvail[track] = item.timeSec + w / scrollSpeedPxPerSec + 0.35f
                 activeScroll.add(ActiveScroll(item, track, w))
             }
-            DanmakuType.TOP, DanmakuType.BOTTOM -> {
-                val track = pickFixedTrack(item.timeSec, item.type)
+            DanmakuType.TOP -> {
+                if (!showTop) return
+                val track = pickFixedTrack(item.timeSec)
+                if (track < 0) return
+                fixedNextAvail[track] = item.timeSec + fixedDurationSec
+                activeFixed.add(ActiveFixed(item, track))
+            }
+            DanmakuType.BOTTOM -> {
+                if (!showBottom) return
+                val track = pickFixedTrack(item.timeSec)
                 if (track < 0) return
                 fixedNextAvail[track] = item.timeSec + fixedDurationSec
                 activeFixed.add(ActiveFixed(item, track))
@@ -150,14 +195,14 @@ class DanmakuView @JvmOverloads constructor(
         }
     }
 
-    private fun pickScrollTrack(t: Float, w: Float): Int {
+    private fun pickScrollTrack(t: Float): Int {
         for (i in 0 until trackCount) {
             if (scrollNextAvail[i] <= t) return i
         }
         return -1
     }
 
-    private fun pickFixedTrack(t: Float, type: DanmakuType): Int {
+    private fun pickFixedTrack(t: Float): Int {
         for (i in 0 until trackCount) {
             if (fixedNextAvail[i] <= t) return i
         }
@@ -165,19 +210,16 @@ class DanmakuView @JvmOverloads constructor(
     }
 
     private fun measureText(item: DanmakuItem): Float {
-        textPaint.textSize = item.fontSize * density
-        return textPaint.measureText(item.text)
+        fillPaint.textSize = item.fontSize * fontScale * density
+        return fillPaint.measureText(item.text)
     }
 
     private fun expireOld(sec: Float) {
-        // 滚动：x < -w 即出屏
         val it1 = activeScroll.iterator()
         while (it1.hasNext()) {
             val a = it1.next()
-            val x = scrollX(a, sec)
-            if (x < -a.width) it1.remove()
+            if (scrollX(a, sec) < -a.width) it1.remove()
         }
-        // 固定：超过 duration
         val it2 = activeFixed.iterator()
         while (it2.hasNext()) {
             val a = it2.next()
@@ -186,7 +228,6 @@ class DanmakuView @JvmOverloads constructor(
     }
 
     private fun scrollX(a: ActiveScroll, sec: Float): Float {
-        // 从右进入，匀速左移
         val elapsed = (sec - a.item.timeSec) * scrollSpeedPxPerSec
         return width - elapsed
     }
@@ -196,20 +237,21 @@ class DanmakuView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         if (!visible || height == 0) return
         val sec = timeProvider() / 1000f
-        // 滚动弹幕
         for (a in activeScroll) {
+            if (a.track >= trackCount) continue
             val x = scrollX(a, sec)
             if (x < -a.width || x > width) continue
             val y = a.track * trackHeight + baseFontSize
             drawDanmaku(canvas, a.item, x, y)
         }
-        // 固定弹幕
+        val areaBottom = effectiveAreaHeight()
         for (a in activeFixed) {
+            if (a.track >= trackCount) continue
             val w = measureText(a.item)
             val x = (width - w) / 2f
             val y = when (a.item.type) {
                 DanmakuType.TOP -> a.track * trackHeight + baseFontSize
-                DanmakuType.BOTTOM -> height - (trackCount - 1 - a.track) * trackHeight
+                DanmakuType.BOTTOM -> areaBottom - (trackCount - 1 - a.track) * trackHeight - 4f * density
                 else -> a.track * trackHeight + baseFontSize
             }
             drawDanmaku(canvas, a.item, x, y)
@@ -217,15 +259,22 @@ class DanmakuView @JvmOverloads constructor(
     }
 
     private fun drawDanmaku(canvas: Canvas, item: DanmakuItem, x: Float, y: Float) {
-        textPaint.textSize = item.fontSize * density
-        // 描边（黑底）
-        val oldColor = textPaint.color
-        textPaint.color = Color.argb(220, 0, 0, 0)
-        canvas.drawText(item.text, x, y, textPaint)
-        // 正文
-        textPaint.color = item.color
-        canvas.drawText(item.text, x, y, textPaint)
-        textPaint.color = oldColor
+        val sizePx = item.fontSize * fontScale * density
+        strokePaint.textSize = sizePx
+        fillPaint.textSize = sizePx
+
+        val strokeAlpha = (210f * alphaRatio).roundToInt().coerceIn(0, 255)
+        strokePaint.color = Color.argb(strokeAlpha, 0, 0, 0)
+        canvas.drawText(item.text, x, y, strokePaint)
+
+        val textAlpha = (Color.alpha(item.color) * alphaRatio).roundToInt().coerceIn(0, 255)
+        fillPaint.color = Color.argb(
+            textAlpha,
+            Color.red(item.color),
+            Color.green(item.color),
+            Color.blue(item.color)
+        )
+        canvas.drawText(item.text, x, y, fillPaint)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

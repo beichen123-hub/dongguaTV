@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 播放器右侧滑出弹幕设置面板：磨砂液态玻璃 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="0"
+                android:startColor="#48FFFFFF"
+                android:endColor="#10FFFFFF" />
+            <corners
+                android:topLeftRadius="22dp"
+                android:bottomLeftRadius="22dp" />
+        </shape>
+    </item>
+    <item
+        android:left="1dp"
+        android:top="1dp"
+        android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#E8181C28"
+                android:endColor="#ED0E1118" />
+            <corners
+                android:topLeftRadius="21dp"
+                android:bottomLeftRadius="21dp" />
+        </shape>
+    </item>
+</layer-list>

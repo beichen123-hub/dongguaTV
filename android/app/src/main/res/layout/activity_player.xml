@@ -14,36 +14,81 @@
         app:use_controller="true"
         app:show_buffering="when_playing" />
 
-    <!-- 弹幕叠加层：覆盖在播放器之上，不挡底部控制条（底部留 64dp） -->
+    <!-- 弹幕叠加层：占满视频画幅，显示高度比例由 DanmakuView.areaRatio 动态控制 -->
     <com.beichen.dongguatv.player.danmaku.DanmakuView
         android:id="@+id/danmakuView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="64dp" />
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="48dp" />
 
-    <ImageView
-        android:id="@+id/btnBack"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_margin="12dp"
-        android:src="@drawable/ic_back"
-        android:background="@drawable/bg_circle_alpha"
-        android:padding="8dp"
-        android:layout_gravity="top|start" />
+    <!-- 顶部悬浮栏（随播放器控制条同步显隐）：液态玻璃返回按钮 + 剧名集数 -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:background="@drawable/bg_hero_gradient"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="18dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="18dp">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnDanmaku"
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_glass_circle"
+            android:padding="9dp"
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:id="@+id/tvPlayerTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/textPrimary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- 兜底按钮条：仅当找不到 Media3 exo_basic_controls 时才显示 -->
+    <LinearLayout
+        android:id="@+id/fallbackDanmakuBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_margin="12dp"
-        android:text="弹幕开"
-        android:minWidth="0dp"
-        android:textSize="12sp"
-        app:backgroundTint="@color/colorPrimary" />
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="56dp"
+        android:background="@drawable/bg_glass_pill"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="4dp"
+        android:visibility="gone">
 
-    <!-- 兜底：采集源给的是分享页/播放页、抠不出 m3u8 时，
-         直接用内置浏览器打开原页面（页面自带 hls.js 能播，代价是没有弹幕） -->
+        <ImageButton
+            android:id="@+id/btnFallbackToggle"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="弹幕开关"
+            android:src="@drawable/ic_danmaku_on" />
+
+        <ImageButton
+            android:id="@+id/btnFallbackSettings"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="弹幕设置"
+            android:src="@drawable/ic_danmaku_settings" />
+    </LinearLayout>
+
+    <!-- WebView 兜底模式 -->
     <WebView
         android:id="@+id/webPlayer"
         android:layout_width="match_parent"
@@ -56,7 +101,365 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="gone"
-        android:indeterminateTint="@color/colorPrimary" />
+        android:indeterminateTint="@color/colorPrimary"
+        android:visibility="gone" />
+
+    <!-- 弹幕设置面板遮罩（点空白关闭） -->
+    <View
+        android:id="@+id/panelScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66000000"
+        android:visibility="gone" />
+
+    <!-- 右侧滑出：液态玻璃弹幕设置面板 -->
+    <ScrollView
+        android:id="@+id/panelDanmaku"
+        android:layout_width="316dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="@drawable/bg_glass_panel"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="18dp"
+            android:paddingVertical="16dp">
+
+            <!-- 标题栏 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="弹幕设置"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btnDanmakuReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_glass_chip"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="恢复默认"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="11sp" />
+
+                <ImageView
+                    android:id="@+id/btnClosePanel"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="8dp"
+                    android:padding="5dp"
+                    android:src="@drawable/ic_close" />
+            </LinearLayout>
+
+            <!-- 弹幕总开关 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_glass_chip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="开启弹幕"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="13sp" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swDanmakuEnable"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <!-- 显示区域（占屏幕多少） -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="显示区域"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/area25"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="1/4屏"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/area50"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="半屏"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/area75"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="3/4屏"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/area100"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="全屏"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- 不透明度 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="不透明度"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvAlphaVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="85%"
+                    android:textColor="@color/colorPrimaryLight"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/seekAlpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:max="80"
+                android:progress="65"
+                android:progressTint="@color/colorPrimary"
+                android:thumbTint="@color/colorPrimary" />
+
+            <!-- 字体大小 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="字体大小"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/fontSmall"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="小"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/fontNormal"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="标准"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/fontLarge"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="大"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/fontXL"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="超大"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- 滚动速度 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="弹幕速度"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/speedSlow"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="慢"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/speedNormal"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="正常"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/speedFast"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="快"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/speedVeryFast"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="极快"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- 顶部/底部弹幕开关 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_glass_chip"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="顶部固定弹幕"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/swShowTop"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/divider" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="底部固定弹幕"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/swShowBottom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
 
 </FrameLayout>

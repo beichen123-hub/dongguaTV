@@ -85,4 +85,21 @@ object PlayUrlParser {
     /** 取总集数（所有线路中最大的集数） */
     fun episodeCount(playUrl: String): Int =
         parse(playUrl).maxOfOrNull { it.episodes.size } ?: 0
+
+    /**
+     * 自动优选最佳播放线路（去掉 UI 重复线路 tab 后由后台自动挑选）：
+     * 1) URL 含 .m3u8（直链优先，能原生 ExoPlayer 播且出弹幕）
+     * 2) 线路名含 m3u8
+     * 3) 集数最多
+     */
+    fun pickBestLine(lines: List<PlayLine>): PlayLine? {
+        if (lines.isEmpty()) return null
+        return lines.maxWithOrNull(
+            compareBy<PlayLine>(
+                { line -> line.episodes.any { it.url.contains(".m3u8", ignoreCase = true) } },
+                { line -> line.name.contains("m3u8", ignoreCase = true) },
+                { line -> line.episodes.size }
+            )
+        )
+    }
 }

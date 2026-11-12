@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 详情页头图渐变遮罩 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="270"
+        android:startColor="#660B0D13"
+        android:centerColor="#B30B0D13"
+        android:endColor="#FF0B0D13" />
+</shape>

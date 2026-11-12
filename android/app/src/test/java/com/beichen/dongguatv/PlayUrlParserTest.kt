@@ -57,4 +57,20 @@ class PlayUrlParserTest {
         assertEquals(1, lines[0].episodes.size)
         assertEquals("https://x.com/2.m3u8", lines[0].episodes[0].url)
     }
+
+    @Test
+    fun pick_best_line_prefers_m3u8_over_share_page() {
+        val raw = "第01集\$https://vip.lz-cdn3.com/share/abc#第02集\$https://vip.lz-cdn3.com/share/def" +
+            "\$\$\$第01集\$https://cdn.example.com/1/index.m3u8"
+        val lines = PlayUrlParser.parse(raw, "lzplay,lzm3u8")
+        val best = PlayUrlParser.pickBestLine(lines)
+        assertEquals("lzm3u8", best?.name)
+    }
+
+    @Test
+    fun pick_best_line_prefers_more_episodes_when_both_m3u8() {
+        val lines = PlayUrlParser.parse(sample, "bfzym3u8,ffm3u8")
+        val best = PlayUrlParser.pickBestLine(lines)
+        assertEquals("bfzym3u8", best?.name)
+    }
 }

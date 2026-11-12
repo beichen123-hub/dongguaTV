@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Hero 轮播单页：大背景图 + 底部渐变 + 标签/标题/简介/播放按钮（对标 Web 首页 heroCarousel） -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -21,15 +20,16 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="18dp">
 
         <TextView
             android:id="@+id/tvTag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_tag_chip"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="2dp"
+            android:paddingHorizontal="9dp"
+            android:paddingVertical="3dp"
             android:textColor="@color/colorOnPrimary"
             android:textSize="10sp"
             android:textStyle="bold" />
@@ -41,8 +41,11 @@
             android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:maxLines="1"
+            android:shadowColor="#80000000"
+            android:shadowDy="2"
+            android:shadowRadius="4"
             android:textColor="@color/textPrimary"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <TextView
@@ -51,21 +54,22 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:ellipsize="end"
+            android:lineSpacingExtra="2dp"
             android:maxLines="2"
             android:textColor="@color/textSecondary"
-            android:textSize="11sp" />
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/btnPlay"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="38dp"
+            android:layout_marginTop="12dp"
             android:background="@drawable/bg_play_button"
             android:drawableStart="@drawable/ic_play_arrow"
-            android:drawablePadding="4dp"
+            android:drawablePadding="5dp"
             android:gravity="center"
-            android:paddingStart="18dp"
-            android:paddingEnd="22dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="20dp"
             android:text="@string/action_play"
             android:textColor="@color/colorOnPrimary"
             android:textSize="13sp"

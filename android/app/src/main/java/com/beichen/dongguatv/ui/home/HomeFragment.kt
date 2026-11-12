@@ -69,6 +69,14 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 顶部悬浮栏避让状态栏
+        val padBaseTop = (8 * resources.displayMetrics.density).toInt()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.topFloatingBar) { v, insets ->
+            val top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            v.setPadding(v.paddingLeft, top + padBaseTop, v.paddingRight, v.paddingBottom)
+            insets
+        }
+
         binding.tvSearchEntry.setOnClickListener {
             requireActivity().findViewById<BottomNavigationView>(R.id.bottomNav)
                 ?.selectedItemId = R.id.nav_search

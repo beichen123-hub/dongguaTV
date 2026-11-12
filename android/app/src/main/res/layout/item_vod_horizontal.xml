@@ -2,46 +2,56 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="110dp"
+    android:layout_width="116dp"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="10dp">
+    android:layout_marginEnd="12dp">
 
-    <!-- 宽度 110dp 已是固定值，海报高度也用固定值：0dp + 只有顶部约束时
-         ConstraintLayout 无法解出高度，会退化成 0 高（海报整行看不见）。 -->
-    <ImageView
-        android:id="@+id/ivPoster"
-        android:layout_width="110dp"
-        android:layout_height="165dp"
-        android:background="@color/colorSurfaceVariant"
-        android:scaleType="centerCrop"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/posterCard"
+        android:layout_width="116dp"
+        android:layout_height="172dp"
+        app:cardBackgroundColor="@color/colorSurfaceVariant"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:strokeColor="#29FFFFFF"
+        app:strokeWidth="1dp">
+
+        <ImageView
+            android:id="@+id/ivPoster"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/tvRemarks"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:background="@color/colorPrimary"
-        android:paddingHorizontal="4dp"
-        android:paddingVertical="1dp"
-        android:textColor="@android:color/white"
+        android:layout_margin="6dp"
+        android:background="@drawable/bg_rating_badge"
+        android:elevation="6dp"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="2dp"
+        android:textColor="@color/colorPrimaryLight"
         android:textSize="9sp"
-        app:layout_constraintBottom_toBottomOf="@id/ivPoster"
-        app:layout_constraintEnd_toEndOf="@id/ivPoster" />
+        app:layout_constraintBottom_toBottomOf="@id/posterCard"
+        app:layout_constraintEnd_toEndOf="@id/posterCard" />
 
     <TextView
         android:id="@+id/tvName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="7dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/textPrimary"
-        android:textSize="12sp"
+        android:textSize="13sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivPoster" />
+        app:layout_constraintTop_toBottomOf="@id/posterCard" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,129 +1,322 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBackground">
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_back"
-            app:titleTextColor="@color/textPrimary" />
-    </com.google.android.material.appbar.AppBarLayout>
+    android:background="@drawable/bg_ambient_canvas">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:clipToPadding="false"
+        android:paddingBottom="28dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- 沉浸式 Emby 液态玻璃头图区 -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="292dp">
+
+                <ImageView
+                    android:id="@+id/ivBackdrop"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_detail_backdrop_gradient" />
+
+                <!-- 海报 + 信息区贴靠头图底部 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:gravity="bottom"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="16dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="108dp"
+                        android:layout_height="154dp"
+                        app:cardBackgroundColor="@color/colorSurfaceVariant"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="8dp"
+                        app:strokeColor="#38FFFFFF"
+                        app:strokeWidth="1dp">
+
+                        <ImageView
+                            android:id="@+id/ivPoster"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="2"
+                            android:textColor="@color/textPrimary"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvMeta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/bg_glass_chip"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"
+                            android:textColor="@color/textSecondary"
+                            android:textSize="11sp"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/tvRemarks"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textColor="@color/colorPrimaryLight"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- 动作按钮行：立即播放（渐变胶囊） + 收藏/追剧（液态玻璃胶囊） -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="16dp">
-                <ImageView
-                    android:id="@+id/ivPoster"
-                    android:layout_width="120dp"
-                    android:layout_height="170dp"
-                    android:scaleType="centerCrop"
-                    android:background="@color/colorSurfaceVariant" />
-                <LinearLayout
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:id="@+id/btnPlay"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="12dp">
-                    <TextView android:id="@+id/tvTitle"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:textColor="@color/textPrimary" android:textSize="18sp"
-                        android:textStyle="bold" />
-                    <TextView android:id="@+id/tvMeta"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textColor="@color/textSecondary" android:textSize="13sp" />
-                    <TextView android:id="@+id/tvRemarks"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textColor="@color/colorPrimary" android:textSize="13sp" />
+                    android:background="@drawable/bg_play_button"
+                    android:drawableStart="@drawable/ic_play_arrow"
+                    android:drawablePadding="6dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="18dp"
+                    android:text="立即播放"
+                    android:textColor="@color/colorOnPrimary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/btnFavorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_glass_chip"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:id="@+id/ivFavIcon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_favorite_border" />
+
+                    <TextView
+                        android:id="@+id/tvFavText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:text="收藏"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnFollow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_glass_chip"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:id="@+id/ivFollowIcon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_bell" />
+
+                    <TextView
+                        android:id="@+id/tvFollowText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:text="追剧"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="13sp" />
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- 播放源切换（原图 2 处，仅保留这一处干净站点切换，删除多余线路 Tab） -->
+            <LinearLayout
+                android:id="@+id/sourceSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="14dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="8dp"
+                    android:text="播放源"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:paddingHorizontal="16dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:id="@+id/sourceRow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+                </HorizontalScrollView>
+            </LinearLayout>
+
+            <!-- 剧情简介（液态玻璃卡片，自动清洗 HTML 标签并支持折叠展开） -->
+            <LinearLayout
+                android:id="@+id/cardSynopsis"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_glass_card"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="剧情简介"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvToggleSynopsis"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="展开"
+                        android:textColor="@color/colorPrimaryLight"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:ellipsize="end"
+                    android:lineSpacingExtra="5dp"
+                    android:maxLines="3"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- 选集头部：集数统计 + 正序/倒序切换 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
-                android:paddingBottom="12dp">
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnPlay"
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:text="立即播放"
-                    android:layout_marginEnd="8dp" />
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFavorite"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="收藏" android:layout_marginEnd="8dp" />
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFollow"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="追剧" />
-            </LinearLayout>
+                android:paddingBottom="8dp">
 
-            <!-- 换源：同一部剧在其它采集站的可用源，点一下直接切 -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingBottom="12dp"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:id="@+id/sourceRow"
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="选集"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvEpisodeTotal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:id="@+id/btnSortOrder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_glass_chip"
+                    android:gravity="center"
                     android:orientation="horizontal"
-                    android:visibility="gone" />
-            </HorizontalScrollView>
+                    android:paddingHorizontal="10dp">
 
-            <TextView
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="简介" android:textColor="@color/textPrimary"
-                android:textSize="15sp" android:textStyle="bold"
-                android:paddingHorizontal="16dp" />
-            <TextView android:id="@+id/tvContent"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:textColor="@color/textSecondary" android:textSize="13sp"
-                android:lineSpacingExtra="4dp"
-                android:padding="16dp" />
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_sort" />
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tabLines"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:tabTextColor="@color/textSecondary"
-                app:tabSelectedTextColor="@color/colorPrimary"
-                app:tabIndicatorColor="@color/colorPrimary" />
+                    <TextView
+                        android:id="@+id/tvSortOrder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="正序"
+                        android:textColor="@color/textSecondary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/gridEpisodes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:nestedScrollingEnabled="false" />
+                android:nestedScrollingEnabled="false"
+                android:paddingHorizontal="12dp" />
 
             <ProgressBar
                 android:id="@+id/loading"
@@ -147,4 +340,16 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <!-- 顶部悬浮液态玻璃返回按钮 -->
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/bg_glass_circle"
+        android:padding="9dp"
+        android:src="@drawable/ic_back" />
+
+</FrameLayout>
