@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 悬浮液态玻璃底部导航胶囊 -->
-    <FrameLayout
+    <!-- 悬浮液态玻璃底部导航胶囊（自绘三 Tab，避免 Material3 item 挤压重叠） -->
+    <LinearLayout
         android:id="@+id/navGlassBar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
@@ -21,21 +21,105 @@
         android:layout_marginHorizontal="18dp"
         android:layout_marginBottom="14dp"
         android:background="@drawable/bg_glass_pill"
-        android:elevation="12dp">
+        android:baselineAligned="false"
+        android:elevation="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="6dp">
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomNav"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            app:elevation="0dp"
-            app:itemActiveIndicatorStyle="@style/GlassNavIndicator"
-            app:itemIconSize="22dp"
-            app:itemIconTint="@color/nav_item_color"
-            app:itemRippleColor="#22FF6B3D"
-            app:itemTextColor="@color/nav_item_color"
-            app:labelVisibilityMode="labeled"
-            app:menu="@menu/bottom_nav_menu" />
-    </FrameLayout>
+        <!-- 首页 -->
+        <LinearLayout
+            android:id="@+id/tabHome"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_glass_tab_active"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <ImageView
+                android:id="@+id/tabHomeIcon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="首页"
+                android:src="@drawable/ic_home" />
+
+            <TextView
+                android:id="@+id/tabHomeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:text="首页"
+                android:textColor="@color/colorPrimaryLight"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- 搜索 -->
+        <LinearLayout
+            android:id="@+id/tabSearch"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <ImageView
+                android:id="@+id/tabSearchIcon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="搜索"
+                android:src="@drawable/ic_search" />
+
+            <TextView
+                android:id="@+id/tabSearchLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:text="搜索"
+                android:textColor="@color/textSecondary"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- 我的 -->
+        <LinearLayout
+            android:id="@+id/tabMine"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingVertical="4dp">
+
+            <ImageView
+                android:id="@+id/tabMineIcon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="我的"
+                android:src="@drawable/ic_mine" />
+
+            <TextView
+                android:id="@+id/tabMineLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:text="我的"
+                android:textColor="@color/textSecondary"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
 
 </FrameLayout>

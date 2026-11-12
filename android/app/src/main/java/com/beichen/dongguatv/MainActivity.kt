@@ -2,9 +2,13 @@ package com.beichen.dongguatv
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -25,6 +29,12 @@ class MainActivity : AppCompatActivity() {
     private val mineFragment by lazy { MineFragment() }
 
     private var current: Fragment? = null
+    private var selectedTab = -1
+
+    // 三个 Tab 的视图引用（自绘，避开 Material3 BottomNavigationView 的 item 挤压问题）
+    private val tabRoots: List<LinearLayout> get() = listOf(binding.tabHome, binding.tabSearch, binding.tabMine)
+    private val tabIcons: List<ImageView> get() = listOf(binding.tabHomeIcon, binding.tabSearchIcon, binding.tabMineIcon)
+    private val tabLabels: List<TextView> get() = listOf(binding.tabHomeLabel, binding.tabSearchLabel, binding.tabMineLabel)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,18 +52,40 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        switchTo(homeFragment)
-
-        binding.bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> { switchTo(homeFragment); true }
-                R.id.nav_search -> { switchTo(searchFragment); true }
-                R.id.nav_mine -> { switchTo(mineFragment); true }
-                else -> false
-            }
+        tabRoots.forEachIndexed { index, root ->
+            root.setOnClickListener { switchToTab(index) }
         }
+        switchToTab(0)
 
         requestNotificationPermission()
+    }
+
+    /** 供首页搜索入口等外部调用，直接切到指定 Tab */
+    fun switchToTab(index: Int) {
+        if (index !in 0..2 || index == selectedTab) return
+        selectedTab = index
+        highlightTab(index)
+        when (index) {
+            0 -> switchTo(homeFragment)
+            1 -> switchTo(searchFragment)
+            2 -> switchTo(mineFragment)
+        }
+    }
+
+    private fun highlightTab(index: Int) {
+        val active = getColor(R.color.colorPrimaryLight)
+        val inactive = getColor(R.color.textSecondary)
+        tabRoots.forEachIndexed { i, root ->
+            root.setBackgroundResource(
+                if (i == index) R.drawable.bg_glass_tab_active else 0
+            )
+        }
+        tabIcons.forEachIndexed { i, icon ->
+            icon.imageTintList = ColorStateList.valueOf(if (i == index) active else inactive)
+        }
+        tabLabels.forEachIndexed { i, label ->
+            label.setTextColor(if (i == index) active else inactive)
+        }
     }
 
     private fun switchTo(target: Fragment) {

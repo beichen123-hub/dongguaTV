@@ -272,7 +272,8 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun applyConfigAndSyncUi() {
         binding.danmakuView.applyConfig(danmakuConfig)
-        binding.danmakuView.setSpeed(danmakuConfig.speedScale * playbackSpeed)
+        // 速度档位由 config 内部计算，这里只传播放器倍速，避免重复相乘
+        binding.danmakuView.setSpeed(playbackSpeed)
         refreshToggleIcons()
 
         if (binding.swDanmakuEnable.isChecked != danmakuConfig.enabled) {
@@ -380,7 +381,7 @@ class PlayerActivity : AppCompatActivity() {
 
             override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
                 playbackSpeed = playbackParameters.speed
-                binding.danmakuView.setSpeed(danmakuConfig.speedScale * playbackSpeed)
+                binding.danmakuView.setSpeed(playbackSpeed)
             }
 
             override fun onPositionDiscontinuity(

@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
+import com.beichen.dongguatv.MainActivity
 import com.beichen.dongguatv.R
 import com.beichen.dongguatv.data.ApiClient
 import com.beichen.dongguatv.data.NameUtil
@@ -26,7 +27,6 @@ import com.beichen.dongguatv.data.VodItem
 import com.beichen.dongguatv.databinding.FragmentHomeBinding
 import com.beichen.dongguatv.databinding.SectionVodRowBinding
 import com.beichen.dongguatv.ui.detail.DetailActivity
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -80,8 +80,7 @@ class HomeFragment : Fragment() {
         }
 
         binding.tvSearchEntry.setOnClickListener {
-            requireActivity().findViewById<BottomNavigationView>(R.id.bottomNav)
-                ?.selectedItemId = R.id.nav_search
+            (requireActivity() as? MainActivity)?.switchToTab(1)
         }
         binding.refresh.setOnRefreshListener { loadHome() }
         loadHome()

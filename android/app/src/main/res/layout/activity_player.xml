@@ -14,13 +14,11 @@
         app:use_controller="true"
         app:show_buffering="when_playing" />
 
-    <!-- 弹幕叠加层：占满视频画幅，显示高度比例由 DanmakuView.areaRatio 动态控制 -->
+    <!-- 弹幕叠加层：占满视频画幅，显示高度比例由 DanmakuView 的 clipRect 精确控制 -->
     <com.beichen.dongguatv.player.danmaku.DanmakuView
         android:id="@+id/danmakuView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="48dp" />
+        android:layout_height="match_parent" />
 
     <!-- 顶部悬浮栏（随播放器控制条同步显隐）：液态玻璃返回按钮 + 剧名集数 -->
     <LinearLayout
