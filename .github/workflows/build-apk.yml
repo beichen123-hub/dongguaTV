@@ -11,6 +11,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # 版本号自增：每次构建 versionCode 都更大，朋友后续可直接覆盖安装
+    env:
+      VERSION_CODE: ${{ github.run_number }}
+      VERSION_NAME: "1.0.${{ github.run_number }}"
+      # 签名 4 件套：没配置时为空字符串，release 步骤整体跳过，保持纯 debug 出包
+      SIGN_KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+      SIGN_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+      SIGN_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+      SIGN_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,8 +43,19 @@ jobs:
         working-directory: android
         run: chmod +x gradlew
 
-      # 纯逻辑单测（播放地址解析 / 剧名归一化）。这些不是形式主义：
-      # vod_play_url 的 $ # $$$ 分隔、剧名营销后缀，都是踩过坑的地方。
+      - name: Check release signing secrets
+        id: signing
+        run: |
+          if [ -n "$SIGN_KEYSTORE_B64" ] && [ -n "$SIGN_STORE_PASSWORD" ] && \
+             [ -n "$SIGN_KEY_ALIAS" ] && [ -n "$SIGN_KEY_PASSWORD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "检测到完整签名配置，将额外产出固定签名的 release APK"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "未配置签名 Secrets，跳过 release 构建（仅输出 debug APK）"
+          fi
+
+      # 纯逻辑单测（播放地址解析 / 剧名归一化 / 弹幕时间轴）
       - name: Unit tests
         working-directory: android
         run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
@@ -59,3 +80,33 @@ jobs:
           path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 30
           if-no-files-found: error
+
+      # ---------------- 可选：固定签名 release 包 ----------------
+      - name: Decode release keystore
+        if: steps.signing.outputs.ready == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/dgsign"
+          echo "$SIGN_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/dgsign/release.p12"
+          echo "RELEASE_KEYSTORE_FILE=$RUNNER_TEMP/dgsign/release.p12" >> "$GITHUB_ENV"
+
+      - name: Build release APK
+        if: steps.signing.outputs.ready == 'true'
+        working-directory: android
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Upload release APK
+        if: steps.signing.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dongguatv-release-apk
+          path: android/app/build/outputs/apk/release/*.apk
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Cleanup keystore
+        if: ${{ always() && steps.signing.outputs.ready == 'true' }}
+        run: rm -rf "$RUNNER_TEMP/dgsign"

@@ -4,6 +4,24 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+// ---------------------------------------------------------------------------
+// release 签名：仅当 CI 通过 GitHub Secrets 注入了完整签名信息时启用。
+// 私钥绝不入库；未配置时 assembleRelease 产出未签名包，workflow 会自动跳过该任务。
+// 本地无签名配置时不影响 debug 构建，保证「没配 Secrets = 维持原有行为」。
+// ---------------------------------------------------------------------------
+val releaseKeystoreFile = System.getenv("RELEASE_KEYSTORE_FILE")
+val releaseStorePassword = System.getenv("RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = System.getenv("RELEASE_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+// 在 Project 作用域解析成 File，避免 android{} 内依赖隐式 receiver
+val releaseKeystore: java.io.File? = releaseKeystoreFile
+    ?.takeIf { it.isNotBlank() }
+    ?.let { file(it) }
+val releaseSigningReady = releaseKeystore != null && releaseKeystore.exists() &&
+        !releaseStorePassword.isNullOrBlank() &&
+        !releaseKeyAlias.isNullOrBlank() &&
+        !releaseKeyPassword.isNullOrBlank()
+
 android {
     namespace = "com.beichen.dongguatv"
     compileSdk = 34
@@ -12,16 +30,35 @@ android {
         applicationId = "com.beichen.dongguatv"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        // CI 可注入 VERSION_CODE（用 github.run_number 自增），实现后续版本覆盖安装；
+        // 本地构建默认 1，不影响开发。
+        versionCode = (System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1)
+        versionName = System.getenv("VERSION_NAME")?.takeIf { it.isNotBlank() } ?: "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (releaseSigningReady) {
+            create("release") {
+                storeFile = releaseKeystore!!
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            if (releaseSigningReady) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            // 关闭 R8 混淆 / 资源压缩：工程用了 Gson 反射、Room、Retrofit、Glide、ViewBinding，
+            // 本机无真机验证条件，开混淆极易导致运行时崩溃。自用分发优先保证与 debug 行为一致，
+            // 代价只是 APK 大约大几百 KB。
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
